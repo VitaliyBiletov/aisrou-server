@@ -18,8 +18,8 @@ app.use(errorHandler)
 
 const start = async () => {
   try {
-    // await sequilize.authenticate()
-    // await sequilize.sync({ alter: true })
+    await sequilize.authenticate()
+    await sequilize.sync({ alter: true })
     app.listen(PORT, ()=>{
       console.log(`Server started on port ${PORT} ...`)
     })
