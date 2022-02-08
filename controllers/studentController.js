@@ -48,7 +48,6 @@ class StudentController {
     } catch (e) {
       return next(ErrorApi.badRequest(e.message))
     }
-
   }
 }
 

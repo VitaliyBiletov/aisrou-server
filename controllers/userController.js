@@ -55,9 +55,8 @@ class UserController {
       process.env.SECRET_KEY,
       {expiresIn: "24h"}
     )
+
     res.json(token)
-
-
   }
   async check(req, res, next){
     const token = jwt.sign(
@@ -65,11 +64,36 @@ class UserController {
       process.env.SECRET_KEY,
       {expiresIn: "24h"}
     )
-    return res.json({token})
+    return res.json(token)
   }
 
   async getAll(req, res){
-    res.json({message: "Список всех пользователей!"})
+    const users = await User.findAll()
+    res.json(users)
+  }
+
+  async setPassword(req, res, next){
+    const {id, password} = req.body
+    const hashPassword = await bcrypt.hash(password, 5)
+    const updateUser = await User.update({password: hashPassword}, {where:{id}})
+    console.log(updateUser)
+    if (updateUser == 0){
+      return next(ErrorApi.badRequest(`Отстутствует пользователь с таким id (${id})`))
+    }
+    res.json({message: `Пароль пользователя с id = ${id} изменён`})
+  }
+
+  async remove(req, res, next){
+    const {id} = req.params
+    try {
+      const count = await User.destroy({where: {id}})
+      if (count === 0){
+        return next(ErrorApi.badRequest(`Отстутствует пользователь с id = ${id}`))
+      }
+      return res.json({message: `Удалено записей: ${count}`})
+    } catch (e) {
+      return next(ErrorApi.badRequest(e.message))
+    }
   }
 }
 
