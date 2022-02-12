@@ -3,6 +3,14 @@ const {User} = require('../models/models')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
+const generateToken = (id, email, role) => {
+  return jwt.sign(
+    {id, email, role},
+    process.env.SECRET_KEY,
+    {expiresIn: "24h"}
+  )
+}
+
 class UserController {
   async registration(req, res, next){
       const {
@@ -27,11 +35,7 @@ class UserController {
 
       const user = await User.create({email, password: hashPassword, firstName, lastName, patronymic, role})
 
-      const token = jwt.sign(
-        {id: user.id, email, role: user.role},
-        process.env.SECRET_KEY,
-        {expiresIn: "24h"}
-      )
+      const token = generateToken(user.id, user.email, user.role)
       res.json(token)
   }
 
@@ -50,34 +54,41 @@ class UserController {
       return next(ErrorApi.badRequest("Введен неверный пароль"))
     }
 
-    const token = jwt.sign(
-      {id: user.id, email, role: user.role},
-      process.env.SECRET_KEY,
-      {expiresIn: "24h"}
-    )
+    const token = generateToken(user.id, user.email, user.role)
 
     res.json(token)
   }
+
   async check(req, res, next){
-    const token = jwt.sign(
-      {id: req.user.id, email: req.user.email, role: req.user.role},
-      process.env.SECRET_KEY,
-      {expiresIn: "24h"}
-    )
+    const token = generateToken(req.user.id, req.user.email, req.user.role)
     return res.json(token)
   }
 
+  async get(req, res){
+    const {id} = req.params
+    const user = await User.findOne({where:{id}, attributes: ['id', 'firstName', 'lastName', 'patronymic', 'email', 'role']})
+    res.json(user)
+  }
+
   async getAll(req, res){
-    const users = await User.findAll()
+    const users = await User.findAll({attributes: ['id', 'lastName', 'firstName', 'patronymic', 'email', 'role']})
     res.json(users)
+  }
+
+  async editUser(req, res, next){
+    try{
+      const user = await User.update(req.body, {where:{id: req.params.id}})
+      res.json({user})
+    }catch (e) {
+      return next(ErrorApi.badRequest('Такой email уже есть в системе'))
+    }
   }
 
   async setPassword(req, res, next){
     const {id, password} = req.body
     const hashPassword = await bcrypt.hash(password, 5)
     const updateUser = await User.update({password: hashPassword}, {where:{id}})
-    console.log(updateUser)
-    if (updateUser == 0){
+    if (updateUser === 0){
       return next(ErrorApi.badRequest(`Отстутствует пользователь с таким id (${id})`))
     }
     res.json({message: `Пароль пользователя с id = ${id} изменён`})

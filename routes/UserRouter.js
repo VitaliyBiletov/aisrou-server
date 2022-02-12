@@ -9,6 +9,8 @@ router.post('/registration', checkRole("ADMIN"), userController.registration)
 router.post('/login', userController.login)
 router.post('/auth', authMiddleware ,userController.check)
 router.get('/all', checkRole("ADMIN"), userController.getAll)
+router.get('/:id', checkRole("ADMIN"), userController.get)
+router.post('/edit/:id', checkRole("ADMIN"), userController.editUser)
 router.post('/password-set', checkRole("ADMIN"), userController.setPassword)
 router.delete('/remove/:id', checkRole("ADMIN"), userController.remove)
 
