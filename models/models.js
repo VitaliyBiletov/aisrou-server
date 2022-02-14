@@ -4,21 +4,21 @@ const {DataTypes} = require('sequelize')
 
 const User = sequelize.define('user', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  firstName: {type: DataTypes.STRING, allowNull: false},
-  lastName: {type: DataTypes.STRING, allowNull: false},
-  patronymic: {type: DataTypes.STRING, allowNull: false},
-  email: {type: DataTypes.STRING, unique: true},
-  password: {type: DataTypes.STRING},
-  role: {type: DataTypes.STRING, defaultValue: "USER"}
+  firstName: {type: DataTypes.STRING, allowNull: true, field: 'Имя'},
+  lastName: {type: DataTypes.STRING, allowNull: true, field: 'Фамилия'},
+  patronymic: {type: DataTypes.STRING, allowNull: true, field: 'Отчество'},
+  email: {type: DataTypes.STRING, unique: true, field: 'Email'},
+  password: {type: DataTypes.STRING, field: 'Пароль'},
+  role: {type: DataTypes.STRING, defaultValue: "USER", field: 'Роль'}
 })
 
 const Student = sequelize.define('student', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  firstName: {type: DataTypes.STRING, allowNull: false},
-  lastName: {type: DataTypes.STRING, allowNull: false},
-  dateOfBirth: {type: DataTypes.DATE, allowNull: false},
-  enrollmentDate: {type: DataTypes.DATE, allowNull: false},
-  enrollmentСlass: {type: DataTypes.INTEGER, allowNull: false},
+  firstName: {type: DataTypes.STRING, allowNull: false, field: 'Имя'},
+  lastName: {type: DataTypes.STRING, allowNull: false, field: 'Фамилия'},
+  dateOfBirth: {type: DataTypes.DATEONLY, allowNull: false, field: 'Дата рождения'},
+  enrollmentDate: {type: DataTypes.DATEONLY, allowNull: false, field: 'Дата зачисления'},
+  enrollmentСlass: {type: DataTypes.INTEGER, allowNull: false, field: 'Класс зачисления'},
 })
 
 const Microgroup = sequelize.define('microgroup', {

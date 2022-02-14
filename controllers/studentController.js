@@ -21,7 +21,7 @@ class StudentController {
 
   async getAll(req, res, next){
     try {
-      const students = await Student.findAll()
+      const students = await Student.findAll({attributes: ['id', 'Фамилия', 'Имя', 'Дата рождения', 'Класс зачисления', 'Дата зачисления']})
       return res.json(students)
     } catch (e) {
       return res.json({message: e.message})
@@ -35,6 +35,11 @@ class StudentController {
       return next(ErrorApi.badRequest(`Отстутствует ученик с id = ${id}`))
     }
     return res.json(student)
+  }
+
+  async edit(req, res, next){
+    const student = await Student.update(req.body, {where:{id: req.params.id}})
+    res.json({student})
   }
 
   async remove(req, res, next){

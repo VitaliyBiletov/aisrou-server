@@ -59,7 +59,7 @@ class UserController {
     res.json(token)
   }
 
-  async check(req, res, next){
+  async check(req, res){
     const token = generateToken(req.user.id, req.user.email, req.user.role)
     return res.json(token)
   }
@@ -71,7 +71,7 @@ class UserController {
   }
 
   async getAll(req, res){
-    const users = await User.findAll({attributes: ['id', 'lastName', 'firstName', 'patronymic', 'email', 'role']})
+    const users = await User.findAll({attributes: ['id', 'Фамилия', 'Имя', 'Отчество', 'Email', 'Роль']})
     res.json(users)
   }
 
@@ -85,7 +85,10 @@ class UserController {
   }
 
   async setPassword(req, res, next){
-    const {id, password} = req.body
+    const {id} = req.params
+    const {password} = req.body
+    console.log(id)
+    console.log(password)
     const hashPassword = await bcrypt.hash(password, 5)
     const updateUser = await User.update({password: hashPassword}, {where:{id}})
     if (updateUser === 0){
