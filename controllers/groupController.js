@@ -17,9 +17,52 @@ class GroupController {
       return next(ErrorApi.badRequest('Не выбран ученик'))
     }
 
+    const item = await Group.findOne({where:{userId, studentId}})
+
+    if (item){
+      return next(ErrorApi.badRequest('Ученик уже прикреплен!'))
+    }
+
     const group= await Group.create({userId, studentId})
 
     res.json(group)
+  }
+
+  async unAttach(req, res, next){
+    const {
+      groupId
+    } = req.body
+
+    const user = await Group.destroy({
+      where:{id: groupId},
+    }
+    )
+    res.json({
+      user
+    })
+  }
+
+  async getGroups(req, res){
+    const {
+      userId
+    } = req.query
+    const user = await User.findOne({
+        where:{id: userId},
+        include: {
+          model: Student,
+          attributes:['id','lastName','firstName'],
+          through:{
+            attributes:['id']
+          },
+        },
+        attributes:['lastName','firstName', 'patronymic'],
+      }
+    )
+    res.json(user.students.map(student=>({
+      id: student.group.id,
+      studentId: student.id,
+      'Фамилия Имя': student.lastName + ' ' + student.firstName
+    })))
   }
 
   async getUsers(req, res){
@@ -33,24 +76,6 @@ class GroupController {
     const students = await Student.findAll({
       attributes:['id','lastName', 'firstName']
     })
-    res.json(students)
-  }
-
-  async getStudentsForUser(req, res){
-    const {userId} = req.query
-    const students = await Student.findAll({
-      include:{
-        model: User,
-        where:{id: userId},
-        required: true,
-        attributes:[],
-        through: {
-          attributes:[]
-        }
-      },
-      attributes:['id','Имя','Фамилия'],
-    })
-    console.log(students)
     res.json(students)
   }
 
