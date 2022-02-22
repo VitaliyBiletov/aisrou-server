@@ -21,18 +21,18 @@ const Student = sequelize.define('student', {
   enrollmentСlass: {type: DataTypes.INTEGER, allowNull: false, field: 'Класс зачисления'},
 })
 
-const Microgroup = sequelize.define('microgroup', {
-  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+const Group = sequelize.define('group', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
 
-User.belongsToMany(Student, {through: Microgroup})
-Student.belongsToMany(User, {through: Microgroup})
+User.belongsToMany(Student, {through: Group})
+Student.belongsToMany(User, {through: Group})
 
 
 module.exports = {
   User,
   Student,
-  Microgroup
+  Group
 }
 
 
