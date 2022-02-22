@@ -3,9 +3,9 @@ const {User} = require('../models/models')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-const generateToken = (id, email, role) => {
+const generateToken = (id, email, fullName, role) => {
   return jwt.sign(
-    {id, email, role},
+    {id, email, fullName, role},
     process.env.SECRET_KEY,
     {expiresIn: "24h"}
   )
@@ -35,7 +35,9 @@ class UserController {
 
       const user = await User.create({email, password: hashPassword, firstName, lastName, patronymic, role})
 
-      const token = generateToken(user.id, user.email, user.role)
+      const fullName = userFullName(user)
+
+      const token = generateToken(user.id, user.email, fullName, user.role)
       res.json(token)
   }
 
@@ -54,13 +56,17 @@ class UserController {
       return next(ErrorApi.badRequest("Введен неверный пароль"))
     }
 
-    const token = generateToken(user.id, user.email, user.role)
+    const fullName = userFullName(user)
+
+    console.log(fullName)
+
+    const token = generateToken(user.id, user.email, fullName, user.role)
 
     res.json(token)
   }
 
   async check(req, res){
-    const token = generateToken(req.user.id, req.user.email, req.user.role)
+    const token = generateToken(req.user.id, req.user.email, req.user.fullName, req.user.role)
     return res.json(token)
   }
 
@@ -109,6 +115,11 @@ class UserController {
       return next(ErrorApi.badRequest(e.message))
     }
   }
+}
+
+function userFullName(user){
+  console.log(user)
+  return `${user.lastName} ${user.firstName[0]}. ${user.patronymic[0]}.`
 }
 
 module.exports = new UserController()
