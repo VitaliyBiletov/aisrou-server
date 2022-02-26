@@ -9,7 +9,7 @@ const authMiddleware = require('../middleware/authMiddleware')
 
 router.use('/user', userRouter)
 router.use('/student', checkRole("ADMIN"), studentRouter)
-router.use('/group', checkRole("ADMIN"), groupRouter)
+router.use('/group', groupRouter)
 router.use('/diagnostic',authMiddleware, diagnosticRouter)
 
 module.exports = router

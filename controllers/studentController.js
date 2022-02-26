@@ -21,7 +21,7 @@ class StudentController {
 
   async getAll(req, res, next){
     try {
-      const students = await Student.findAll({attributes: ['id', 'Фамилия', 'Имя', 'Дата рождения', 'Класс зачисления', 'Дата зачисления']})
+      const students = await Student.findAll({attributes: ['id', 'lastName', 'firstName', 'dateOfBirth']})
       return res.json(students)
     } catch (e) {
       return res.json({message: e.message})

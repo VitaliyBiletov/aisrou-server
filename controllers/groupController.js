@@ -28,7 +28,7 @@ class GroupController {
     res.json(group)
   }
 
-  async unAttach(req, res, next){
+  async unAttach(req, res){
     const {
       groupId
     } = req.body
@@ -52,7 +52,7 @@ class GroupController {
           model: Student,
           attributes:['id','lastName','firstName'],
           through:{
-            attributes:['id']
+            attributes:['id', 'createdAt']
           },
         },
         attributes:['lastName','firstName', 'patronymic'],
@@ -61,16 +61,18 @@ class GroupController {
     res.json(user.students.map(student=>({
       id: student.group.id,
       studentId: student.id,
-      'Фамилия Имя': student.lastName + ' ' + student.firstName
+      lastName: student.lastName,
+      firstName: student.firstName,
+      createdAt: new Date(student.group.createdAt).toLocaleDateString(),
     })))
   }
 
-  async getUsers(req, res){
-    const users = await User.findAll({
-      attributes:['id','lastName', 'firstName', 'patronymic']
-    })
-    res.json(users)
-  }
+  // async getUsers(req, res){
+  //   const users = await User.findAll({
+  //     attributes:['id','lastName', 'firstName', 'patronymic']
+  //   })
+  //   res.json(users)
+  // }
 
   async getStudents(req, res){
     const students = await Student.findAll({
@@ -99,25 +101,6 @@ class GroupController {
     const user = await Group.findOne({where:{id}, attributes: ['id', 'firstName', 'lastName', 'patronymic', 'email', 'role']})
     res.json(user.userId)
   }
-
-  /*
-    async getAll(req, res){
-      const users = await User.findAll({attributes: ['id', 'Фамилия', 'Имя', 'Отчество', 'Email', 'Роль']})
-      res.json(users)
-    }
-
-    async remove(req, res, next){
-      const {id} = req.params
-      try {
-        const count = await User.destroy({where: {id}})
-        if (count === 0){
-          return next(ErrorApi.badRequest(`Отстутствует пользователь с id = ${id}`))
-        }
-        return res.json({message: `Удалено записей: ${count}`})
-      } catch (e) {
-        return next(ErrorApi.badRequest(e.message))
-      }
-    }*/
 }
 
 module.exports = new GroupController()
