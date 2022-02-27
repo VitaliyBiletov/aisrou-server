@@ -28,7 +28,7 @@ class StudentController {
     }
   }
 
-  async check(req, res, next){
+  async get(req, res, next){
     const {id} = req.params
     const student = await Student.findOne({where: {id}})
     if(!student){
@@ -37,9 +37,13 @@ class StudentController {
     return res.json(student)
   }
 
-  async edit(req, res, next){
-    const student = await Student.update(req.body, {where:{id: req.params.id}})
-    res.json({student})
+  async edit(req, res){
+    await Student.update(req.body, {where:{id: req.params.id}})
+    const student = await Student.findOne({
+      attributes: ['id', 'lastName', 'firstName', 'dateOfBirth'],
+      where:{id: req.params.id}
+    })
+    res.json(student)
   }
 
   async remove(req, res, next){

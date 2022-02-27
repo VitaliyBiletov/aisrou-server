@@ -43,25 +43,16 @@ class UserController {
 
   async login(req, res, next){
     const {email , password} = req.body
-
     const user = await User.findOne({where:{email}})
-
     if (!user){
       return next(ErrorApi.badRequest('Пользователь не найден'))
     }
-
     const comparePassword = bcrypt.compareSync(password, user.password)
-
     if (!comparePassword){
       return next(ErrorApi.badRequest("Введен неверный пароль"))
     }
-
     const fullName = userFullName(user)
-
-    console.log(fullName)
-
     const token = generateToken(user.id, user.email, fullName, user.role)
-
     res.json(token)
   }
 
@@ -81,10 +72,14 @@ class UserController {
     res.json(users)
   }
 
-  async editUser(req, res, next){
+  async edit(req, res, next){
     try{
-      const user = await User.update(req.body, {where:{id: req.params.id}})
-      res.json({user})
+      await User.update(req.body, {where:{id: req.params.id}})
+      const user = await User.findOne({
+        attributes: ['id', 'lastName', 'firstName', 'patronymic', 'Email', 'Роль'],
+        where:{id: req.params.id}
+      })
+      res.json(user)
     }catch (e) {
       return next(ErrorApi.badRequest('Такой email уже есть в системе'))
     }

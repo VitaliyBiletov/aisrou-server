@@ -25,13 +25,21 @@ const Group = sequelize.define('group', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true}
 })
 
+const Diagnostic = sequelize.define('diagnostic', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  createdAt:{type: DataTypes.DATEONLY}
+})
+
 User.belongsToMany(Student, {through: Group})
 Student.belongsToMany(User, {through: Group})
+
+Student.hasMany(Diagnostic)
 
 
 module.exports = {
   User,
   Student,
+  Diagnostic,
   Group
 }
 

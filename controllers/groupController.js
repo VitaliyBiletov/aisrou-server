@@ -1,7 +1,5 @@
 const ErrorApi = require('../error/ErrorApi')
 const {User, Student, Group} = require('../models/models')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
 
 class GroupController {
   async attach(req, res, next){
@@ -28,26 +26,19 @@ class GroupController {
     res.json(group)
   }
 
-  async unAttach(req, res){
-    const {
-      groupId
-    } = req.body
-
-    const user = await Group.destroy({
-      where:{id: groupId},
+  async remove(req, res){
+    const {id} = req.params
+    const group = await Group.destroy({
+      where:{id},
     }
     )
-    res.json({
-      user
-    })
+    res.json(group)
   }
 
-  async getGroups(req, res){
-    const {
-      userId
-    } = req.query
+  async getGroup(req, res){
+    const {id} = req.params
     const user = await User.findOne({
-        where:{id: userId},
+        where:{id},
         include: {
           model: Student,
           attributes:['id','lastName','firstName'],
@@ -65,41 +56,6 @@ class GroupController {
       firstName: student.firstName,
       createdAt: new Date(student.group.createdAt).toLocaleDateString(),
     })))
-  }
-
-  // async getUsers(req, res){
-  //   const users = await User.findAll({
-  //     attributes:['id','lastName', 'firstName', 'patronymic']
-  //   })
-  //   res.json(users)
-  // }
-
-  async getStudents(req, res){
-    const students = await Student.findAll({
-      attributes:['id','lastName', 'firstName']
-    })
-    res.json(students)
-  }
-
-  async getAll(req, res){
-    const users = await User.findAll({
-      include: {
-        model: Student,
-        required: true,
-        attributes: ['lastName','firstName'],
-        through:{
-          attributes:['id','createdAt']
-        }
-      },
-      attributes:['lastName', 'firstName', 'patronymic']
-    })
-    res.json(users)
-  }
-
-  async get(req, res){
-    const {id} = req.params
-    const user = await Group.findOne({where:{id}, attributes: ['id', 'firstName', 'lastName', 'patronymic', 'email', 'role']})
-    res.json(user.userId)
   }
 }
 

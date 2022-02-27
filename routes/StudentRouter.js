@@ -1,12 +1,13 @@
 const express = require('express')
 const router = express.Router()
-
+const authMiddleware = require('../middleware/authMiddleware')
+const checkRole = require('../middleware/checkRoleMiddleware')
 const studentController = require('../controllers/studentController')
 
-router.post('/registration', studentController.registration)
-router.get('/all', studentController.getAll)
-router.post('/edit/:id', studentController.edit)
-router.get('/:id', studentController.check)
-router.delete('/remove/:id', studentController.remove)
+router.post('/registration', authMiddleware, studentController.registration)
+router.get('/all', authMiddleware, studentController.getAll)
+router.get('/:id', authMiddleware, studentController.get)
+router.post('/edit/:id', checkRole('ADMIN'), studentController.edit)
+router.delete('/remove/:id', checkRole('ADMIN'), studentController.remove)
 
 module.exports = router
