@@ -6,6 +6,6 @@ const diagnosticController = require('../controllers/diagnosticController')
 
 router.get('/get', diagnosticController.getDiagnostics)
 router.post('/create', diagnosticController.create)
-router.post('/remove', diagnosticController.remove)
+router.delete('/remove/:id', diagnosticController.remove)
 
 module.exports = router

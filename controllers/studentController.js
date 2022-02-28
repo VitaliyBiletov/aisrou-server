@@ -21,7 +21,19 @@ class StudentController {
 
   async getAll(req, res, next){
     try {
-      const students = await Student.findAll({attributes: ['id', 'lastName', 'firstName', 'dateOfBirth']})
+      let students
+      switch (req.query.type) {
+        case 'fullName':
+          students = await Student.findAll(
+            {attributes: ['id', 'lastName', 'firstName', 'fullName']}
+          )
+          students = students.map(s=>({id: s.id, fullName: s.fullName}))
+          break
+        default:
+          students = await Student.findAll(
+          {attributes: ['id', 'lastName', 'firstName', 'dateOfBirth']}
+        )
+      }
       return res.json(students)
     } catch (e) {
       return res.json({message: e.message})

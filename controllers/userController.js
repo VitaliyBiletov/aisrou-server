@@ -16,27 +16,19 @@ class UserController {
       const {
         email, password, firstName, lastName, patronymic, role
       } = req.body
-
       if (!email || !password){
         return next(ErrorApi.badRequest('Некорректный email или пароль'))
       }
-
       if (!firstName || !lastName || !patronymic){
         return next(ErrorApi.badRequest('ФИО обязательны для ввода'))
       }
-
       const candidate = await User.findOne({where: {email}})
-
       if (candidate){
         return next(ErrorApi.badRequest('Пользователь с таким email существует'))
       }
-
       const hashPassword = await bcrypt.hash(password, 5)
-
       const user = await User.create({email, password: hashPassword, firstName, lastName, patronymic, role})
-
-      const fullName = userFullName(user)
-
+      const fullName = user.fullName
       const token = generateToken(user.id, user.email, fullName, user.role)
       res.json(token)
   }
@@ -51,7 +43,7 @@ class UserController {
     if (!comparePassword){
       return next(ErrorApi.badRequest("Введен неверный пароль"))
     }
-    const fullName = userFullName(user)
+    const fullName = user.fullName
     const token = generateToken(user.id, user.email, fullName, user.role)
     res.json(token)
   }
@@ -68,7 +60,14 @@ class UserController {
   }
 
   async getAll(req, res){
-    const users = await User.findAll({attributes: ['id', 'lastName', 'firstName', 'patronymic', 'Email', 'Роль']})
+    let users
+    switch (req.query.type){
+      case 'fullName':
+        users = await User.findAll({attributes: ['id', 'lastName', 'firstName','patronymic', 'fullName']})
+        break
+      default:
+        users = await User.findAll({attributes: ['id', 'lastName', 'firstName', 'patronymic', 'Email', 'Роль']})
+    }
     res.json(users)
   }
 
@@ -112,9 +111,5 @@ class UserController {
   }
 }
 
-function userFullName(user){
-  console.log(user)
-  return `${user.lastName} ${user.firstName[0]}. ${user.patronymic[0]}.`
-}
 
 module.exports = new UserController()

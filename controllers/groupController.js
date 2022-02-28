@@ -41,7 +41,6 @@ class GroupController {
         where:{id},
         include: {
           model: Student,
-          attributes:['id','lastName','firstName'],
           through:{
             attributes:['id', 'createdAt']
           },
@@ -52,9 +51,9 @@ class GroupController {
     res.json(user.students.map(student=>({
       id: student.group.id,
       studentId: student.id,
-      lastName: student.lastName,
+      fullName: student.fullName,
       firstName: student.firstName,
-      createdAt: new Date(student.group.createdAt).toLocaleDateString(),
+      createdAt: student.group.createdAt,
     })))
   }
 }
