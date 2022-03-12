@@ -1,6 +1,6 @@
 const {Diagnostic, Student, User} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
-
+const fs = require('fs')
 
 class DiagnosticController {
   async getDiagnostics(req, res){
@@ -28,6 +28,12 @@ class DiagnosticController {
       progress: diagnostic.progress,
       user: user.fullName,
     })
+  }
+
+  async save(req, res){
+    const {data} = req.body
+    fs.writeFileSync('files/testFile.json', JSON.stringify(data));
+    res.json({"message": 'saveOk'})
   }
 
   async remove(req, res){
