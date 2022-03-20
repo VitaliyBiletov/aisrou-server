@@ -60,15 +60,29 @@ class UserController {
   }
 
   async getAll(req, res){
-    let users
-    switch (req.query.type){
-      case 'fullName':
-        users = await User.findAll({attributes: ['id', 'lastName', 'firstName','patronymic', 'fullName']})
-        break
-      default:
-        users = await User.findAll({attributes: ['id', 'lastName', 'firstName', 'patronymic', 'Email', 'Роль']})
-    }
-    res.json(users)
+    const users = await User.findAll()
+
+    const fields = Object.entries(User.fieldAttributeMap).filter(([key, value])=>value !== 'password').map(d=>{
+      return {name: d[1], title: d[0]}
+    })
+
+    const list = users.map(d=>{
+      return {id: d.id, fieldsData: fields.map(f=>{
+          return {name: f.name, value: d[f.name]}
+        })}
+    })
+
+
+    // console.log(fields)
+
+    // switch (req.query.type){
+    //   case 'fullName':
+    //     users = await User.findAll({attributes: ['id', 'lastName', 'firstName','patronymic', 'fullName']})
+    //     break
+    //   default:
+    //     users = await User.findAll({attributes: ['id', 'lastName', 'firstName', 'patronymic', 'Email', 'Роль']})
+    // }
+    res.json({fields: fields, data: list})
   }
 
   async edit(req, res, next){

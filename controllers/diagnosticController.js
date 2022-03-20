@@ -1,4 +1,4 @@
-const {Diagnostic, Student, User} = require('../models/models')
+const {Diagnostic, Student, User, Type} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
 const fs = require('fs')
 
@@ -7,27 +7,89 @@ class DiagnosticController {
     const {studentId} = req.query
     const diagnostics = await Diagnostic.findAll({
       where: {studentId},
-      include: {
-        model: User,
-        attributes: ['lastName', 'firstName', 'patronymic']
-      },
-      attributes: ['id', 'progress', 'createdAt']
+      include: [
+        {
+          model: User,
+        },
+        {
+          model: Type,
+        },
+      ]
     })
-    const listDiags = diagnostics.map(({id, createdAt, progress, user}) =>
-      ({id, createdAt, progress: progress, user: user.fullName}))
-    res.json(listDiags)
+
+    const fields = Object.entries(Diagnostic.fieldAttributeMap).map(d=>{
+      if (d.name === 'userId'){
+        return {name: 'user', 'title': 'Учитель'}
+      }
+      return {name: d[1], title: d[0]}
+    })
+
+    const list = diagnostics.map(d=>{
+      return {id: d.id, fieldsData: fields.map(f=>{
+          if (f.name === 'userId'){
+            return {name: 'user', value: d.user.fullName}
+          }
+          if (f.name === 'typeId'){
+            return {name: 'type', value: d.type.title}
+          }
+          return {name: f.name, value: d[f.name]}
+        })}
+    })
+
+    res.json({fields: fields, data: list})
   }
 
   async create(req, res){
-    const {studentId, userId} = req.body
-    const diagnostic = await Diagnostic.create({studentId, userId})
-    const user = await User.findOne({where: {id: userId}})
-    res.json({
-      id: diagnostic.id,
-      createdAt: diagnostic.createdAt,
-      progress: diagnostic.progress,
-      user: user.fullName,
+    const {studentId, userId, typeId, classNumber, date} = req.body
+    const diagnostic = await Diagnostic.create({
+      studentId,
+      userId,
+      progress: 0,
+      classNumber,
+      typeId: typeId,
+      createdAt: Date.parse(date)
     })
+
+    const fields = Object.entries(Diagnostic.fieldAttributeMap).map(d=>{
+      if (d.name === 'userId'){
+        return {name: 'user', 'title': 'Учитель'}
+      }
+      return {name: d[1], title: d[0]}
+    })
+
+    const user = await User.findOne({where: {id: diagnostic.userId}})
+    const type = await Type.findOne({where: {id: diagnostic.typeId}})
+
+    const diagnosticData = fields.map((f)=>{
+      if (f.name === 'userId'){
+        return {name: 'user', value: user.fullName}
+      }
+      if (f.name === 'typeId'){
+        return {name: 'typeId', value: type.title}
+      }
+      return {name: [f.name], value: diagnostic.dataValues[f.name]}
+    })
+
+    const diagnosticFormat = {id: diagnostic.id, fieldsData: diagnosticData}
+
+    res.json(diagnosticFormat)
+    //
+    // console.log(diagnostic)
+    //
+    // const user = await User.findOne({where: {id: userId}})
+    // res.json({
+    //   id: diagnostic.id,
+    //   createdAt: diagnostic.createdAt,
+    //   progress: diagnostic.progress,
+    //   user: user.fullName,
+    //   classNumber: diagnostic.classNumber,
+    //   type: diagnostic.typeId
+    // })
+  }
+
+  async getTypes(req, res){
+    const types = await Type.findAll()
+    res.json(types)
   }
 
   async save(req, res){

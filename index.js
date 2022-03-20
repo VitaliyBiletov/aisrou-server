@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const sequilize = require('./db')
-const models = require('./models/models')
+const {User, Type, Diagnostic} = require('./models/models')
 const router = require('./routes/index')
 const errorHandler = require('./middleware/ErrorHandlerMiddleware')
 

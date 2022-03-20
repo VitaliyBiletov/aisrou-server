@@ -48,13 +48,19 @@ class GroupController {
         attributes:['lastName','firstName', 'patronymic'],
       }
     )
-    res.json(user.students.map(student=>({
-      id: student.group.id,
-      studentId: student.id,
-      fullName: student.fullName,
-      firstName: student.firstName,
-      createdAt: student.group.createdAt,
-    })))
+
+    if (user.students.length !== 0){
+      return res.json(user.students.map(student=>({
+        id: student.group.id,
+        studentId: student.id,
+        fullName: student.fullName,
+        firstName: student.firstName,
+        createdAt: student.group.createdAt,
+      })))
+    } else {
+      return res.json([])
+    }
+
   }
 }
 
