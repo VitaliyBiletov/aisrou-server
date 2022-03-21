@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware')
 
 const groupController = require('../controllers/groupController')
 
+router.post('/list',authMiddleware, groupController.getGroupsList)
 router.post('/attach',checkRole('ADMIN'), groupController.attach)
 router.get('/:id', authMiddleware, groupController.getGroup)
 router.delete('/remove/:id', authMiddleware, groupController.remove)

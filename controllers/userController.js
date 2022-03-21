@@ -2,6 +2,7 @@ const ErrorApi = require('../error/ErrorApi')
 const {User} = require('../models/models')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const {formatedDataFromTable} = require('./utils')
 
 const generateToken = (id, email, fullName, role) => {
   return jwt.sign(
@@ -59,30 +60,18 @@ class UserController {
     res.json(user)
   }
 
+  //return all records from table (admin->users)
   async getAll(req, res){
-    const users = await User.findAll()
+    const exclude = ['password', 'updatedAt']
+    const data = await formatedDataFromTable(User, exclude)
+    res.json(data)
+  }
 
-    const fields = Object.entries(User.fieldAttributeMap).filter(([key, value])=>value !== 'password').map(d=>{
-      return {name: d[1], title: d[0]}
-    })
-
-    const list = users.map(d=>{
-      return {id: d.id, fieldsData: fields.map(f=>{
-          return {name: f.name, value: d[f.name]}
-        })}
-    })
-
-
-    // console.log(fields)
-
-    // switch (req.query.type){
-    //   case 'fullName':
-    //     users = await User.findAll({attributes: ['id', 'lastName', 'firstName','patronymic', 'fullName']})
-    //     break
-    //   default:
-    //     users = await User.findAll({attributes: ['id', 'lastName', 'firstName', 'patronymic', 'Email', 'Роль']})
-    // }
-    res.json({fields: fields, data: list})
+  //from select
+  async getList(req, res){
+    const users = await User.findAll({attributes:['id', 'firstName', 'lastName', 'patronymic']})
+    const usersList = users.map(u=>({id: u.id, name: u.fullName}))
+    res.json(usersList)
   }
 
   async edit(req, res, next){

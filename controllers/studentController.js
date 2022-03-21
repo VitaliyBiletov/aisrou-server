@@ -1,5 +1,7 @@
 const {Student} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
+const {formatedDataFromTable} = require('./utils')
+
 
 class StudentController {
   async registration(req, res, next){
@@ -16,28 +18,6 @@ class StudentController {
     } catch (e) {
       return next(ErrorApi.badRequest(e.message))
     }
-
-  }
-
-  async getAll(req, res, next){
-    try {
-      let students
-      switch (req.query.type) {
-        case 'fullName':
-          students = await Student.findAll(
-            {attributes: ['id', 'lastName', 'firstName', 'fullName']}
-          )
-          students = students.map(s=>({id: s.id, fullName: s.fullName}))
-          break
-        default:
-          students = await Student.findAll(
-          {attributes: ['id', 'lastName', 'firstName', 'dateOfBirth']}
-        )
-      }
-      return res.json(students)
-    } catch (e) {
-      return res.json({message: e.message})
-    }
   }
 
   async get(req, res, next){
@@ -47,6 +27,20 @@ class StudentController {
       return next(ErrorApi.badRequest(`Отстутствует ученик с id = ${id}`))
     }
     return res.json(student)
+  }
+
+  //return all records for table (admin->students)
+  async getAll(req, res, next){
+    const exclude = ['updatedAt']
+    const result = await formatedDataFromTable(Student, exclude)
+    res.json(result)
+  }
+
+  //returning list students for select
+  async getList(req, res,){
+    const students = await Student.findAll({attributes:['id', 'firstName', 'lastName']})
+    const studentsList = students.map(s=>({id: s.id, name: s.fullName}))
+    res.json(studentsList)
   }
 
   async edit(req, res){

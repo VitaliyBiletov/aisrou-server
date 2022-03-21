@@ -7,6 +7,7 @@ const userController = require('../controllers/userController')
 
 router.post('/registration', checkRole("ADMIN"), userController.registration)
 router.post('/login', userController.login)
+router.get('/list', checkRole("ADMIN"), userController.getList)
 router.post('/auth', authMiddleware, userController.check)
 router.get('/all', checkRole("ADMIN"), userController.getAll)
 router.get('/:id', checkRole("ADMIN"), userController.get)

@@ -14,10 +14,10 @@ class DiagnosticController {
         {
           model: Type,
         },
-      ]
+      ],
     })
 
-    const fields = Object.entries(Diagnostic.fieldAttributeMap).map(d=>{
+    let fields = Object.entries(Diagnostic.fieldAttributeMap).map(d=>{
       if (d.name === 'userId'){
         return {name: 'user', 'title': 'Учитель'}
       }
