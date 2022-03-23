@@ -57,7 +57,7 @@ class UserController {
 
   async get(req, res){
     const {id} = req.params
-    const user = await User.findOne({where:{id}, attributes: ['id', 'firstName', 'lastName', 'patronymic', 'email', 'role']})
+    const user = await User.findOne({where:{id}, attributes: ['id', 'firstName', 'lastName', 'patronymic', 'role']})
     res.json(user)
   }
 
@@ -77,12 +77,13 @@ class UserController {
 
   async edit(req, res, next){
     try{
-      await User.update(req.body, {where:{id: req.params.id}})
+      await User.update(req.body, {where:{id: req.body.id}})
       const user = await User.findOne({
-        attributes: ['id', 'lastName', 'firstName', 'patronymic', 'Email', 'Роль'],
+        attributes: ['firstName', 'lastName', 'patronymic', 'email', 'Роль'],
         where:{id: req.params.id}
       })
-      res.json(user)
+      const updatedData = {id: Number(req.params.id), fieldsData: Object.entries(user.dataValues).map(([name, value])=>({name, value}))}
+      res.json(updatedData)
     }catch (e) {
       return next(ErrorApi.badRequest('Такой email уже есть в системе'))
     }
