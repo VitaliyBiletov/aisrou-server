@@ -13,6 +13,7 @@ const generateToken = (id, email, fullName, role) => {
 }
 
 class UserController {
+
   async registration(req, res, next){
       const {
         email, password, firstName, lastName, patronymic, role
@@ -31,7 +32,7 @@ class UserController {
       const user = await User.create({email, password: hashPassword, firstName, lastName, patronymic, role})
       const fullName = user.fullName
       const token = generateToken(user.id, user.email, fullName, user.role)
-      res.json(token)
+      res.json({id: user.id, token})
   }
 
   async login(req, res, next){
@@ -62,7 +63,7 @@ class UserController {
 
   //return all records from table (admin->users)
   async getAll(req, res){
-    const exclude = ['password', 'updatedAt']
+    const exclude = ['password','updatedAt']
     const data = await formatedDataFromTable(User, exclude)
     res.json(data)
   }

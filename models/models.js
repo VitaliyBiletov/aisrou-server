@@ -89,7 +89,11 @@ const Group = sequelize.define('group', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
-  }
+  },
+  createdAt: {
+    type: DataTypes.DATEONLY,
+    field: 'Дата создания'
+  },
 })
 
 const Diagnostic = sequelize.define('diagnostic', {

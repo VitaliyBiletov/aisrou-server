@@ -6,13 +6,15 @@ const checkRole = require('../middleware/checkRoleMiddleware')
 const userController = require('../controllers/userController')
 
 router.post('/registration', checkRole("ADMIN"), userController.registration)
-router.post('/login', userController.login)
 router.get('/list', checkRole("ADMIN"), userController.getList)
-router.post('/auth', authMiddleware, userController.check)
 router.get('/all', checkRole("ADMIN"), userController.getAll)
 router.get('/:id', checkRole("ADMIN"), userController.get)
 router.post('/edit/:id', checkRole("ADMIN"), userController.edit)
 router.post('/password-set/:id', checkRole("ADMIN"), userController.setPassword)
 router.delete('/remove/:id', checkRole("ADMIN"), userController.remove)
+
+router.post('/login', userController.login)
+router.post('/auth', authMiddleware, userController.check)
+
 
 module.exports = router
