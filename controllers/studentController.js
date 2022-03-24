@@ -9,9 +9,7 @@ class StudentController {
       firstName,
       lastName,
       dateOfBirth,
-      enrollmentDate,
-      enrollmentСlass } = req.body
-    console.log(req.body)
+      enrollmentDate } = req.body
     try {
       const student = await Student.create({firstName, lastName, dateOfBirth, enrollmentDate, enrollmentСlass})
       return res.json(student)
@@ -46,10 +44,11 @@ class StudentController {
   async edit(req, res){
     await Student.update(req.body, {where:{id: req.params.id}})
     const student = await Student.findOne({
-      attributes: ['id', 'lastName', 'firstName', 'dateOfBirth'],
+      attributes: ['firstName', 'lastName', 'dateOfBirth', 'enrollmentDate'],
       where:{id: req.params.id}
     })
-    res.json(student)
+    const updatedData = {id: Number(req.params.id), fieldsData: Object.entries(student.dataValues).map(([name, value])=>({name, value}))}
+    res.json(updatedData)
   }
 
   async remove(req, res, next){

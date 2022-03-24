@@ -92,8 +92,6 @@ class UserController {
   async setPassword(req, res, next){
     const {id} = req.params
     const {password} = req.body
-    console.log(id)
-    console.log(password)
     const hashPassword = await bcrypt.hash(password, 5)
     const updateUser = await User.update({password: hashPassword}, {where:{id}})
     if (updateUser === 0){

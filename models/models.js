@@ -77,11 +77,6 @@ const Student = sequelize.define('student', {
     allowNull: false,
     field: 'Дата зачисления'
   },
-  enrollmentСlass: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    field: 'Класс зачисления'
-  },
 })
 
 const Group = sequelize.define('group', {
