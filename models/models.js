@@ -111,11 +111,11 @@ const Diagnostic = sequelize.define('diagnostic', {
     field: 'Класс'
   },
   createdAt: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.DATE,
     field: 'Дата создания'
   },
   updatedAt: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.DATE,
     field: 'Дата обновления'
   },
 })
@@ -128,9 +128,7 @@ const Type = sequelize.define('type', {
   title: {
     type: DataTypes.STRING,
     field: 'Название',
-    get(){
-      return this.getDataValue('title')
-    }
+
   },
 }, {
   timestamps: false

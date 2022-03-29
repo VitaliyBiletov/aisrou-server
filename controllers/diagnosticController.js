@@ -27,12 +27,15 @@ class DiagnosticController {
     const list = diagnostics.map(d=>{
       return {id: d.id, fieldsData: fields.map(f=>{
           if (f.name === 'userId'){
-            return {name: 'user', value: d.user.fullName}
+            return {name: 'user', value: d.user.id, title: d.user.fullName}
           }
           if (f.name === 'typeId'){
-            return {name: 'type', value: d.type.title}
+            return {name: 'type', value: d.type.id, title: d.type.title}
           }
-          return {name: f.name, value: d[f.name]}
+          if (f.name === 'createdAt' || f.name === 'updatedAt'){
+            return {name: 'type', value: d.type.id, title: new Date(d[f.name]).toLocaleDateString()}
+          }
+          return {name: f.name, value: d[f.name], title: d[f.name]}
         })}
     })
 
