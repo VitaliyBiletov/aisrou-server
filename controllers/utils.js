@@ -18,7 +18,7 @@ async function formatedDataFromTable(model, exclude=[]){
 
   const list = rows.map(d=>{
     return {id: d.id, fieldsData: fields.map(f=>{
-        return {name: f.name, value: d[f.name]}
+        return {name: f.name, value: f.id, title: d[f.name]}
       })}
   })
 
