@@ -1,7 +1,6 @@
 const {Student} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
-const {formatedDataFromTable} = require('./utils')
-
+const sequilize = require('../db')
 
 class StudentController {
   async registration(req, res, next){
@@ -11,8 +10,8 @@ class StudentController {
       dateOfBirth,
       enrollmentDate } = req.body
     try {
-      const student = await Student.create({firstName, lastName, dateOfBirth, enrollmentDate, enrollmentСlass})
-      return res.json(student)
+      const student = await Student.create({firstName, lastName, dateOfBirth, enrollmentDate})
+      res.json({id: student.id, lastName: student.lastName, firstName: student.firstName})
     } catch (e) {
       return next(ErrorApi.badRequest(e.message))
     }
@@ -29,26 +28,29 @@ class StudentController {
 
   //return all records for table (admin->students)
   async getAll(req, res, next){
-    const exclude = ['updatedAt']
-    const result = await formatedDataFromTable(Student, exclude)
-    res.json(result)
+    const students = await sequilize.query(
+      `SELECT id, "firstName" as "Имя", "lastName" as "Фамилия", "dateOfBirth" as "Дата рождения", "enrollmentDate" as "Дата зачисления" FROM students;`)
+    const fields = students[1].fields.map(f=>f.name)
+    const data = students[0]
+    res.json({fields, data})
   }
 
   //returning list students for select
   async getList(req, res,){
     const students = await Student.findAll({attributes:['id', 'firstName', 'lastName']})
-    const studentsList = students.map(s=>({id: s.id, name: s.fullName}))
+    const studentsList = students.map(s=>({id: s.id, name: s.lastName + " " + s.firstName}))
     res.json(studentsList)
   }
 
   async edit(req, res){
+    console.log("params ", req.params)
+    console.log("body ",req.body)
     await Student.update(req.body, {where:{id: req.params.id}})
     const student = await Student.findOne({
       attributes: ['firstName', 'lastName', 'dateOfBirth', 'enrollmentDate'],
       where:{id: req.params.id}
     })
-    const updatedData = {id: Number(req.params.id), fieldsData: Object.entries(student.dataValues).map(([name, value])=>({name, value}))}
-    res.json(updatedData)
+    res.json({id: Number(req.params.id), ...student.dataValues})
   }
 
   async remove(req, res, next){

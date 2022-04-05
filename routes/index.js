@@ -7,9 +7,10 @@ const groupRouter = require('./GroupRouter')
 const checkRole = require('../middleware/checkRoleMiddleware')
 const authMiddleware = require('../middleware/authMiddleware')
 
-router.use('/user', userRouter)
-router.use('/student', checkRole("ADMIN"), studentRouter)
-router.use('/group', groupRouter)
-router.use('/diagnostic',authMiddleware, diagnosticRouter)
+router.use('/users', userRouter)
+router.use('/students', studentRouter) //checkRole("ADMIN")
+router.use('/groups', groupRouter)
+// router.use('/diagnostic',authMiddleware, diagnosticRouter)
+router.use('/diagnostics', diagnosticRouter)
 
 module.exports = router

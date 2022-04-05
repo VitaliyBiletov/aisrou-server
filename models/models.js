@@ -3,47 +3,36 @@ const sequelize = require('../db')
 const {DataTypes} = require('sequelize')
 
 const User = sequelize.define('user', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  firstName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    field: 'Имя'
-  },
-  lastName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    field: 'Фамилия'
-  },
-  patronymic: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    field: 'Отчество'
-  },
-  fullName: {
-    type: DataTypes.VIRTUAL,
-    get(){
-      return `${this.lastName} ${this.firstName[0]}. ${this.patronymic[0]}.`
-    }
-  },
-  email: {
-    type: DataTypes.STRING,
-    unique: true,
-    field: 'Email'
-  },
-  password: {
-    type: DataTypes.STRING,
-    field: 'Пароль'
-  },
-  role: {
-    type: DataTypes.STRING,
-    defaultValue: "USER",
-    field: 'Роль'
-  },
-})
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    patronymic: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    email: {
+      type: DataTypes.STRING,
+      unique: true,
+    },
+    password: {
+      type: DataTypes.STRING,
+    },
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: "USER",
+    },
+  }
+)
 
 const Student = sequelize.define('student', {
   id: {
@@ -54,28 +43,18 @@ const Student = sequelize.define('student', {
   firstName: {
     type: DataTypes.STRING,
     allowNull: false,
-    field: 'Имя'
   },
   lastName: {
     type: DataTypes.STRING,
     allowNull: false,
-    field: 'Фамилия'
-  },
-  fullName: {
-    type: DataTypes.VIRTUAL,
-    get(){
-      return `${this.lastName} ${this.firstName}`
-    }
   },
   dateOfBirth: {
     type: DataTypes.DATEONLY,
     allowNull: false,
-    field: 'Дата рождения'
   },
   enrollmentDate: {
     type: DataTypes.DATEONLY,
     allowNull: false,
-    field: 'Дата зачисления'
   },
 })
 
@@ -87,36 +66,29 @@ const Group = sequelize.define('group', {
   },
   createdAt: {
     type: DataTypes.DATEONLY,
-    field: 'Дата создания'
   },
 })
 
 const Diagnostic = sequelize.define('diagnostic', {
-  userId:{
+  userId: {
     type: DataTypes.INTEGER,
-    field: 'Учитель'
   },
-  typeId:{
+  typeId: {
     type: DataTypes.INTEGER,
-    field: 'Тип'
   },
   progress: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
-    field: 'Прогресс'
   },
   classNumber: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
-    field: 'Класс'
   },
   createdAt: {
-    type: DataTypes.DATE,
-    field: 'Дата создания'
+    type: DataTypes.DATEONLY,
   },
   updatedAt: {
-    type: DataTypes.DATE,
-    field: 'Дата обновления'
+    type: DataTypes.DATEONLY,
   },
 })
 
@@ -127,15 +99,53 @@ const Type = sequelize.define('type', {
   },
   title: {
     type: DataTypes.STRING,
-    field: 'Название',
 
   },
 }, {
   timestamps: false
 })
 
-User.belongsToMany(Student, {through: Group})
-Student.belongsToMany(User, {through: Group})
+const StateOfFunc = sequelize.define('stateOfFunc', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
+  },
+  hearing: {
+    type: DataTypes.STRING,
+  },
+  vision: {
+    type: DataTypes.STRING,
+  },
+  breath: {
+    type: DataTypes.STRING,
+  },
+  voice: {
+    type: DataTypes.STRING,
+  },
+  prosody: {
+    type: DataTypes.STRING,
+  },
+  articulationApparatus: {
+    type: DataTypes.STRING,
+  },
+  motorSkills: {
+    type: DataTypes.STRING,
+  },
+  additionalInformation: {
+    type: DataTypes.STRING,
+  }
+}, {
+  tableName: "stateOfFun",
+  timestamps: false
+})
+
+User.belongsToMany(Student, {through: Group, foreignKey: 'userId', otherKey: 'studentId'})
+Student.belongsToMany(User, {through: Group, foreignKey: 'studentId', otherKey: 'userId'})
 
 Student.hasMany(Diagnostic)
 
@@ -145,12 +155,15 @@ Diagnostic.belongsTo(Type, {foreignKey: 'typeId'})
 User.hasMany(Diagnostic, {foreignKey: 'userId'})
 Diagnostic.belongsTo(User, {foreignKey: "userId"})
 
+Diagnostic.hasOne(StateOfFunc)
+
 module.exports = {
   User,
   Student,
   Diagnostic,
   Group,
-  Type
+  Type,
+  StateOfFunc
 }
 
 

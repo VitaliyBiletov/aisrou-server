@@ -1,48 +1,31 @@
-const {Diagnostic, Student, User, Type} = require('../models/models')
+const {Diagnostic, StateOfFunc, Student, User, Type} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
 const fs = require('fs')
+const sequilize = require('../db')
 
 class DiagnosticController {
-  async getDiagnostics(req, res){
+  async getDiagnostics(req, res) {
     const {studentId} = req.query
-    const diagnostics = await Diagnostic.findAll({
-      where: {studentId},
-      include: [
-        {
-          model: User,
-        },
-        {
-          model: Type,
-        },
-      ],
-    })
-
-    let fields = Object.entries(Diagnostic.fieldAttributeMap).map(d=>{
-      if (d.name === 'userId'){
-        return {name: 'user', 'title': 'Учитель'}
-      }
-      return {name: d[1], title: d[0]}
-    })
-
-    const list = diagnostics.map(d=>{
-      return {id: d.id, fieldsData: fields.map(f=>{
-          if (f.name === 'userId'){
-            return {name: 'user', value: d.user.id, title: d.user.fullName}
-          }
-          if (f.name === 'typeId'){
-            return {name: 'type', value: d.type.id, title: d.type.title}
-          }
-          if (f.name === 'createdAt' || f.name === 'updatedAt'){
-            return {name: 'type', value: d.type.id, title: new Date(d[f.name]).toLocaleDateString()}
-          }
-          return {name: f.name, value: d[f.name], title: d[f.name]}
-        })}
-    })
-
-    res.json({fields: fields, data: list})
+    const diagnostics = await sequilize.query(`SELECT "diagnostics"."id", "types"."title" as "Тип", progress as "Прогресс", "diagnostics"."classNumber" as "Класс","createdAt" as "Дата"
+                                              FROM diagnostics
+                                              LEFT JOIN types ON diagnostics."typeId" = "types"."id"
+                                              WHERE diagnostics."studentId" = ${studentId};`)
+    const fields = diagnostics[1].fields.map(f => f.name)
+    const data = diagnostics[0]
+    res.json({fields, data})
   }
 
-  async create(req, res){
+  async get(req, res, next) {
+    const {id} = req.params
+    const diagnostic = await Diagnostic.findOne({where: {id: Number(id)}})
+    if (!diagnostic) {
+      console.log('Ошибка на сервере')
+      return next(ErrorApi.badRequest("Диагностики с таким ID не существует"))
+    }
+    res.json(diagnostic)
+  }
+
+  async create(req, res) {
     const {studentId, userId, typeId, classNumber, date} = req.body
     const diagnostic = await Diagnostic.create({
       studentId,
@@ -53,61 +36,38 @@ class DiagnosticController {
       createdAt: Date.parse(date)
     })
 
-    const fields = Object.entries(Diagnostic.fieldAttributeMap).map(d=>{
-      if (d.name === 'userId'){
-        return {name: 'user', 'title': 'Учитель'}
-      }
-      return {name: d[1], title: d[0]}
-    })
-
-    const user = await User.findOne({where: {id: diagnostic.userId}})
     const type = await Type.findOne({where: {id: diagnostic.typeId}})
 
-    const diagnosticData = fields.map((f)=>{
-      if (f.name === 'userId'){
-        return {name: 'user', value: user.fullName}
-      }
-      if (f.name === 'typeId'){
-        return {name: 'typeId', value: type.title}
-      }
-      return {name: [f.name], value: diagnostic.dataValues[f.name]}
+    res.json({
+      id: diagnostic.id,
+      type: type.title,
+      "Прогресс": diagnostic.progress,
+      "Класс": diagnostic.classNumber,
+      date: diagnostic.createdAt
     })
-
-    const diagnosticFormat = {id: diagnostic.id, fieldsData: diagnosticData}
-
-    res.json(diagnosticFormat)
-    //
-    // console.log(diagnostic)
-    //
-    // const user = await User.findOne({where: {id: userId}})
-    // res.json({
-    //   id: diagnostic.id,
-    //   createdAt: diagnostic.createdAt,
-    //   progress: diagnostic.progress,
-    //   user: user.fullName,
-    //   classNumber: diagnostic.classNumber,
-    //   type: diagnostic.typeId
-    // })
   }
 
-  async getTypes(req, res){
+  async getTypes(req, res) {
     const types = await Type.findAll()
     res.json(types)
   }
 
-  async save(req, res){
+  async save(req, res) {
     const {data} = req.body
-    fs.writeFileSync('files/testFile.json', JSON.stringify(data));
-    res.json({"message": 'saveOk'})
+    const stateOfFunc = await StateOfFunc.create({
+      diagnosticId: data.id,
+      ...data.data
+    })
+    res.json(stateOfFunc)
   }
 
-  async remove(req, res){
+  async remove(req, res) {
     const {id} = req.params
     const diagnostic = await Diagnostic.destroy({where: {id}})
-    res.json({
-      mes: 'Ok'
-    })
+    res.json(diagnostic)
   }
+
+
 }
 
 module.exports = new DiagnosticController()
