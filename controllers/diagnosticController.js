@@ -47,6 +47,27 @@ class DiagnosticController {
     })
   }
 
+  async edit(req, res, next){
+    try{
+      await Diagnostic.update(req.body, {where:{id: req.params.id}})
+      const diagnostic = await Diagnostic.findOne({
+        attributes: ['id', 'typeId','progress', 'classNumber', 'createdAt'],
+        where:{id: req.params.id}
+      })
+
+      const type = await Type.findOne({where: {id: diagnostic.typeId}})
+
+      res.json({
+        id: diagnostic.id,
+        type: type.title,
+        "Прогресс": diagnostic.progress,
+        "Класс": diagnostic.classNumber,
+        date: diagnostic.createdAt})
+    }catch (e) {
+      return next(ErrorApi.badRequest(e.message))
+    }
+  }
+
   async getTypes(req, res) {
     const types = await Type.findAll()
     res.json(types)
