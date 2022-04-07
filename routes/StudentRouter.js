@@ -10,6 +10,6 @@ router.get('/', authMiddleware, studentController.getAll)
 router.get('/list', authMiddleware, studentController.getList)
 router.get('/:id', authMiddleware, studentController.get)
 router.put('/:id', checkRole('ADMIN'), studentController.edit)
-router.delete('/remove/:id', checkRole('ADMIN'), studentController.remove)
+router.delete('/:id', checkRole('ADMIN'), studentController.remove)
 
 module.exports = router

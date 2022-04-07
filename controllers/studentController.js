@@ -43,8 +43,6 @@ class StudentController {
   }
 
   async edit(req, res){
-    console.log("params ", req.params)
-    console.log("body ",req.body)
     await Student.update(req.body, {where:{id: req.params.id}})
     const student = await Student.findOne({
       attributes: ['firstName', 'lastName', 'dateOfBirth', 'enrollmentDate'],
