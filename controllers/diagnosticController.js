@@ -25,6 +25,15 @@ class DiagnosticController {
     res.json(diagnostic)
   }
 
+  async tasksLoading(req, res) {
+    const {id} = req.params
+    const stateOfFunc = await StateOfFunc.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude:['id', 'diagnosticId']}
+    },)
+    res.json({stateOfFunc})
+  }
+
   async create(req, res) {
     const {studentId, userId, typeId, classNumber, date} = req.body
     const diagnostic = await Diagnostic.create({
@@ -34,7 +43,10 @@ class DiagnosticController {
       classNumber,
       typeId: typeId,
       createdAt: Date.parse(date)
-    })
+      }
+    )
+
+    await StateOfFunc.create({diagnosticId: diagnostic.id})
 
     const type = await Type.findOne({where: {id: diagnostic.typeId}})
 
@@ -47,12 +59,12 @@ class DiagnosticController {
     })
   }
 
-  async edit(req, res, next){
-    try{
-      await Diagnostic.update(req.body, {where:{id: req.params.id}})
+  async edit(req, res, next) {
+    try {
+      await Diagnostic.update(req.body, {where: {id: req.params.id}})
       const diagnostic = await Diagnostic.findOne({
-        attributes: ['id', 'typeId','progress', 'classNumber', 'createdAt'],
-        where:{id: req.params.id}
+        attributes: ['id', 'typeId', 'progress', 'classNumber', 'createdAt'],
+        where: {id: req.params.id}
       })
 
       const type = await Type.findOne({where: {id: diagnostic.typeId}})
@@ -62,8 +74,9 @@ class DiagnosticController {
         type: type.title,
         "Прогресс": diagnostic.progress,
         "Класс": diagnostic.classNumber,
-        date: diagnostic.createdAt})
-    }catch (e) {
+        date: diagnostic.createdAt
+      })
+    } catch (e) {
       return next(ErrorApi.badRequest(e.message))
     }
   }
@@ -75,11 +88,9 @@ class DiagnosticController {
 
   async save(req, res) {
     const {data} = req.body
-    const stateOfFunc = await StateOfFunc.create({
-      diagnosticId: data.id,
-      ...data.data
-    })
-    res.json(stateOfFunc)
+    await Diagnostic.update({progress: data.progress}, {where: {id: data.id}})
+    const stateOfFunc = await StateOfFunc.update({...data.data}, {where: {diagnosticId: data.id}})
+    return res.json(stateOfFunc)
   }
 
   async remove(req, res) {

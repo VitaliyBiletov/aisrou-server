@@ -77,7 +77,7 @@ const Diagnostic = sequelize.define('diagnostic', {
     type: DataTypes.INTEGER,
   },
   progress: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.FLOAT,
     defaultValue: 0,
   },
   classNumber: {
@@ -105,7 +105,7 @@ const Type = sequelize.define('type', {
   timestamps: false
 })
 
-const StateOfFunc = sequelize.define('stateOfFunc', {
+const StateOfFunc = sequelize.define('state_of_func', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -117,30 +117,37 @@ const StateOfFunc = sequelize.define('stateOfFunc', {
   },
   hearing: {
     type: DataTypes.STRING,
+    defaultValue: ''
   },
   vision: {
     type: DataTypes.STRING,
+    defaultValue: '',
   },
   breath: {
     type: DataTypes.STRING,
+    defaultValue: '',
   },
   voice: {
     type: DataTypes.STRING,
+    defaultValue: '',
   },
   prosody: {
     type: DataTypes.STRING,
+    defaultValue: '',
   },
   articulationApparatus: {
     type: DataTypes.STRING,
+    defaultValue: '',
   },
   motorSkills: {
     type: DataTypes.STRING,
+    defaultValue: '',
   },
   additionalInformation: {
     type: DataTypes.STRING,
+    defaultValue: '',
   }
 }, {
-  tableName: "stateOfFun",
   timestamps: false
 })
 
@@ -156,6 +163,7 @@ User.hasMany(Diagnostic, {foreignKey: 'userId'})
 Diagnostic.belongsTo(User, {foreignKey: "userId"})
 
 Diagnostic.hasOne(StateOfFunc)
+StateOfFunc.belongsTo(Diagnostic)
 
 module.exports = {
   User,

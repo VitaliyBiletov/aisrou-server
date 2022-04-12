@@ -6,6 +6,7 @@ const diagnosticController = require('../controllers/diagnosticController')
 
 router.get('/get', diagnosticController.getDiagnostics)
 router.post('/create', diagnosticController.create)
+router.get('/tasks/:id', diagnosticController.tasksLoading)
 router.put('/:id', diagnosticController.edit)
 router.get('/types', diagnosticController.getTypes)
 router.delete('/:id', diagnosticController.remove)
