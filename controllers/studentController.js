@@ -11,7 +11,13 @@ class StudentController {
       enrollmentDate } = req.body
     try {
       const student = await Student.create({firstName, lastName, dateOfBirth, enrollmentDate})
-      res.json({id: student.id, lastName: student.lastName, firstName: student.firstName})
+      res.json({
+        id: student.id,
+        lastName: student.lastName,
+        firstName: student.firstName,
+        dateOfBirth: student.dateOfBirth,
+        enrollmentDate: student.enrollmentDate
+      })
     } catch (e) {
       return next(ErrorApi.badRequest(e.message))
     }

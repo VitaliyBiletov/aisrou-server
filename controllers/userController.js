@@ -30,7 +30,14 @@ class UserController {
       }
       const hashPassword = await bcrypt.hash(password, 5)
       const user = await User.create({email, password: hashPassword, firstName, lastName, patronymic, role})
-      res.json({id: user.id, lastName: user.lastName, firstName: user.firstName})
+      res.json({
+        id: user.id,
+        lastName: user.lastName,
+        firstName: user.firstName,
+        patronymic: user.patronymic,
+        email: user.email,
+        role: user.role
+      })
   }
 
   async login(req, res, next){
