@@ -1,4 +1,12 @@
-const {Diagnostic, StateOfFunc, Student, User, Type} = require('../models/models')
+const {
+  Diagnostic,
+  StateOfFunc,
+  SensMotor,
+  Grammatic,
+  CoherentSpeech,
+  Lexis,
+  LangAnalysis,
+  Type} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
 const fs = require('fs')
 const sequilize = require('../db')
@@ -29,24 +37,57 @@ class DiagnosticController {
     const {id} = req.params
     const stateOfFunc = await StateOfFunc.findOne({
       where: {diagnosticId: Number(id)},
-      attributes: {exclude:['id', 'diagnosticId']}
-    },)
-    res.json({stateOfFunc})
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+    const sensMotor = await SensMotor.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+    const grammatic = await Grammatic.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+    const lexis = await Lexis.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+    const coherentSpeech = await CoherentSpeech.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+    const langAnalysis = await LangAnalysis.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+
+    res.json({
+      stateOfFunc,
+      sensMotor,
+      grammatic,
+      lexis,
+      coherentSpeech,
+      langAnalysis
+    })
   }
 
   async create(req, res) {
     const {studentId, userId, typeId, classNumber, date} = req.body
     const diagnostic = await Diagnostic.create({
-      studentId,
-      userId,
-      progress: 0,
-      classNumber,
-      typeId: typeId,
-      createdAt: Date.parse(date)
+        studentId,
+        userId,
+        progress: 0,
+        classNumber,
+        typeId: typeId,
+        createdAt: Date.parse(date)
       }
     )
 
     await StateOfFunc.create({diagnosticId: diagnostic.id})
+    await SensMotor.create({diagnosticId: diagnostic.id})
+    await Grammatic.create({diagnosticId: diagnostic.id})
+    await Lexis.create({diagnosticId: diagnostic.id})
+    await CoherentSpeech.create({diagnosticId: diagnostic.id})
+    await LangAnalysis.create({diagnosticId: diagnostic.id})
 
     const type = await Type.findOne({where: {id: diagnostic.typeId}})
 
@@ -89,8 +130,13 @@ class DiagnosticController {
   async save(req, res) {
     const {data} = req.body
     await Diagnostic.update({progress: data.progress}, {where: {id: data.id}})
-    const stateOfFunc = await StateOfFunc.update({...data.data}, {where: {diagnosticId: data.id}})
-    return res.json(stateOfFunc)
+    const stateOfFunc = await StateOfFunc.update({...data.results.stateOfFunc}, {where: {diagnosticId: data.id}})
+    const sensMotor = await SensMotor.update({...data.results.sensMotor}, {where: {diagnosticId: data.id}})
+    const grammatic = await Grammatic.update({...data.results.grammatic}, {where: {diagnosticId: data.id}})
+    const lexis = await Lexis.update({...data.results.lexis}, {where: {diagnosticId: data.id}})
+    const coherentSpeech = await CoherentSpeech.update({...data.results.coherentSpeech}, {where: {diagnosticId: data.id}})
+    const langAnalysis = await LangAnalysis.update({...data.results.langAnalysis}, {where: {diagnosticId: data.id}})
+    return res.json({stateOfFunc, sensMotor, grammatic, lexis, coherentSpeech, langAnalysis})
   }
 
   async remove(req, res) {
