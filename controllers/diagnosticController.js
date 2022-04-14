@@ -6,6 +6,9 @@ const {
   CoherentSpeech,
   Lexis,
   LangAnalysis,
+  Reading,
+  Speed,
+  Writing,
   Type} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
 const fs = require('fs')
@@ -59,6 +62,17 @@ class DiagnosticController {
       where: {diagnosticId: Number(id)},
       attributes: {exclude: ['id', 'diagnosticId']}
     })
+    const reading = await Reading.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+    const speed = await Speed.findOne({
+      where: {diagnosticId: Number(id)}
+    })
+    const writing = await Writing.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
 
     res.json({
       stateOfFunc,
@@ -66,7 +80,9 @@ class DiagnosticController {
       grammatic,
       lexis,
       coherentSpeech,
-      langAnalysis
+      langAnalysis,
+      reading : {speed: speed.count, skills: reading},
+      writing : {skills: writing},
     })
   }
 
@@ -88,6 +104,9 @@ class DiagnosticController {
     await Lexis.create({diagnosticId: diagnostic.id})
     await CoherentSpeech.create({diagnosticId: diagnostic.id})
     await LangAnalysis.create({diagnosticId: diagnostic.id})
+    await Reading.create({diagnosticId: diagnostic.id})
+    await Speed.create({diagnosticId: diagnostic.id})
+    await Writing.create({diagnosticId: diagnostic.id})
 
     const type = await Type.findOne({where: {id: diagnostic.typeId}})
 
@@ -136,7 +155,12 @@ class DiagnosticController {
     const lexis = await Lexis.update({...data.results.lexis}, {where: {diagnosticId: data.id}})
     const coherentSpeech = await CoherentSpeech.update({...data.results.coherentSpeech}, {where: {diagnosticId: data.id}})
     const langAnalysis = await LangAnalysis.update({...data.results.langAnalysis}, {where: {diagnosticId: data.id}})
-    return res.json({stateOfFunc, sensMotor, grammatic, lexis, coherentSpeech, langAnalysis})
+    // console.log(data.results.reading.skills)
+    const reading = await Reading.update({...data.results.reading.skills}, {where: {diagnosticId: data.id}})
+    const writing = await Writing.update({...data.results.writing.skills}, {where: {diagnosticId: data.id}})
+    const speed = await Speed.update({count: data.results.reading.speed}, {where: {diagnosticId: data.id}})
+
+    return res.json({message: "Сохранено"})
   }
 
   async remove(req, res) {

@@ -3,35 +3,35 @@ const sequelize = require('../db')
 const {DataTypes} = require('sequelize')
 
 const User = sequelize.define('user', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    lastName: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    patronymic: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    email: {
-      type: DataTypes.STRING,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING,
-    },
-    role: {
-      type: DataTypes.STRING,
-      defaultValue: "USER",
-    },
-  })
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  firstName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  lastName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  patronymic: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+  },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: "USER",
+  },
+})
 
 const Student = sequelize.define('student', {
   id: {
@@ -322,6 +322,216 @@ const LangAnalysis = sequelize.define('langAnalysis', {
   timestamps: false
 })
 
+const Reading = sequelize.define('reading', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
+  },
+  letterByLetter: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  bySyllables: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  slowlyInSyllables: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  wholeWords: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  phrases: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  passes: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  permutations: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  substitutions: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  additions: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  replays: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  sounds: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  syllables: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  words: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  wrongEmphasis: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  pausesOnPunctuationMarks: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  raiseAndLowerVoice: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  emphasizingImportantWords: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  literalSense: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  figurativeMeaning: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  storyEventChains: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  mainIdea: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  factualData: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  }
+}, {
+  timestamps: false
+})
+
+const Writing = sequelize.define('writing', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
+  },
+  substitutions: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  confusion: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  letterGaps: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  letterSubstitutions: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  softnessDesignationErrors: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  passes: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  permutations: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  addingLetters: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  addingSyllables: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  consolidatedSpelling: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  separateSpelling: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  missingMark: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  morphologicalDisorders: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  syntaxViolations: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  textLevel: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  mirrorSpelling: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  addingLetterElements: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  diffNumElements: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  sameNumElements: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  }
+}, {
+  timestamps: false
+})
+
+const Speed = sequelize.define('speed', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
+  },
+  count: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  }
+}, {
+  timestamps: false
+})
+
 
 User.belongsToMany(Student, {through: Group, foreignKey: 'userId', otherKey: 'studentId'})
 Student.belongsToMany(User, {through: Group, foreignKey: 'studentId', otherKey: 'userId'})
@@ -352,6 +562,15 @@ CoherentSpeech.belongsTo(Diagnostic)
 Diagnostic.hasOne(LangAnalysis)
 LangAnalysis.belongsTo(Diagnostic)
 
+Diagnostic.hasOne(Reading)
+Reading.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(Speed)
+Speed.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(Writing)
+Writing.belongsTo(Diagnostic)
+
 module.exports = {
   User,
   Student,
@@ -363,7 +582,10 @@ module.exports = {
   Grammatic,
   Lexis,
   CoherentSpeech,
-  LangAnalysis
+  LangAnalysis,
+  Reading,
+  Speed,
+  Writing
 }
 
 
