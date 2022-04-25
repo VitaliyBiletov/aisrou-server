@@ -13,6 +13,7 @@ const {
 const ErrorApi = require('../error/ErrorApi')
 const fs = require('fs')
 const sequilize = require('../db')
+const _ = require('lodash')
 
 class DiagnosticController {
   async getDiagnostics(req, res) {
@@ -87,7 +88,7 @@ class DiagnosticController {
   }
 
   async create(req, res) {
-    const {studentId, userId, typeId, classNumber, date} = req.body
+    const {studentId, userId, typeId, classNumber, date, tasks} = req.body
     const diagnostic = await Diagnostic.create({
         studentId,
         userId,
@@ -99,11 +100,11 @@ class DiagnosticController {
     )
 
     await StateOfFunc.create({diagnosticId: diagnostic.id})
-    await SensMotor.create({diagnosticId: diagnostic.id})
-    await Grammatic.create({diagnosticId: diagnostic.id})
-    await Lexis.create({diagnosticId: diagnostic.id})
-    await CoherentSpeech.create({diagnosticId: diagnostic.id})
-    await LangAnalysis.create({diagnosticId: diagnostic.id})
+    await SensMotor.create({diagnosticId: diagnostic.id, ...tasks.sensMotor})
+    await Grammatic.create({diagnosticId: diagnostic.id, ...tasks.grammatic})
+    await Lexis.create({diagnosticId: diagnostic.id, ...tasks.lexis})
+    await CoherentSpeech.create({diagnosticId: diagnostic.id, ...tasks.coherentSpeech})
+    await LangAnalysis.create({diagnosticId: diagnostic.id, ...tasks.langAnalysis})
     await Reading.create({diagnosticId: diagnostic.id})
     await Speed.create({diagnosticId: diagnostic.id})
     await Writing.create({diagnosticId: diagnostic.id})
@@ -169,7 +170,67 @@ class DiagnosticController {
     res.json(diagnostic)
   }
 
+  async getResult(req, res){
+    const {id} = req.params
+    const stateOfFunc = await StateOfFunc.findOne(
+      {
+        where: {diagnosticId: id},
+        attributes: ["Слух", "Зрение", "Голос", "Моторика", "Просодика", "Дыхание", "Артикулляционный аппарат", "Дополнительная информация"]})
+    const sensMotor = await SensMotor.findOne({
+      where: {diagnosticId: id},
+      attributes:[
+        "Артикуляционная моторика",
+        "Фонематическое восприятие",
+        "Звукопроизношение",
+        "Звуко-слоговая структура"
+      ]
+    })
 
+    //Результаты подразделов сенсо-моторного уровня (по отдельности)
+    const result = Object.keys(sensMotor.dataValues).map(section=>{
+      const sum = calcResult(sensMotor.dataValues[section])
+      return {name: section, "Результат": sum}
+    })
+
+    //Массив с результатами разделов
+    const sectionsModels = [
+      {name: "Грамматика", model: Grammatic},
+      {name: "Лексика", model: Lexis},
+      {name: "Связная речь", model: CoherentSpeech},
+      {name: "Языковой анализ", model: LangAnalysis}
+      ]
+
+    const resultSections = await calcSectionResult(id, sectionsModels)
+
+    res.json({
+      stateOfFunc: {title: "Состояние функций", data: stateOfFunc},
+      sensMotor: _.union(result, resultSections),
+    })
+  }
+}
+
+function calcResult(data){
+  if (data.length === 0){
+    return 0
+  }
+  const tmp = data.reduce((sum, current)=>{
+    return sum + current.value
+  }, 0)
+  const result = Number((tmp / (data.length * 3)) * 100).toFixed(2)
+  return parseFloat(result)
+}
+
+async function calcSectionResult(id, modelsList){
+  const sections = await Promise.all(modelsList.map(async function({name, model}){
+      const section = await model.findOne({where:{diagnosticId: id}, attributes:{exclude: ['id', 'diagnosticId']}})
+      const result = Object.keys(section.dataValues).map(item=>{
+        return calcResult(section.dataValues[item])
+      }).reduce((sum, current)=>{
+        return sum + current
+      }, 0)
+    return {name , "Результат": parseFloat((result / Object.keys(section.dataValues).length).toFixed(2))}
+  }))
+  return sections
 }
 
 module.exports = new DiagnosticController()

@@ -12,5 +12,6 @@ router.get('/types', diagnosticController.getTypes)
 router.delete('/:id', diagnosticController.remove)
 router.post('/save/', diagnosticController.save)
 router.get('/:id', diagnosticController.get)
+router.get('/result/:id', diagnosticController.getResult)
 
 module.exports = router
