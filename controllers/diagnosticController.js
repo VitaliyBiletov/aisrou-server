@@ -6,8 +6,11 @@ const {
   CoherentSpeech,
   Lexis,
   LangAnalysis,
-  Reading,
   Speed,
+  ReadingMethod,
+  Right,
+  Expressiveness,
+  Mindfulness,
   Writing,
   Type} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
@@ -63,10 +66,27 @@ class DiagnosticController {
       where: {diagnosticId: Number(id)},
       attributes: {exclude: ['id', 'diagnosticId']}
     })
-    const reading = await Reading.findOne({
+
+    const readingMethod = await ReadingMethod.findOne({
       where: {diagnosticId: Number(id)},
       attributes: {exclude: ['id', 'diagnosticId']}
     })
+
+    const right = await Right.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+
+    const expressiveness = await Expressiveness.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+
+    const mindfulness = await Mindfulness.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+
     const speed = await Speed.findOne({
       where: {diagnosticId: Number(id)}
     })
@@ -82,7 +102,7 @@ class DiagnosticController {
       lexis,
       coherentSpeech,
       langAnalysis,
-      reading : {speed: speed.count, skills: reading},
+      reading : {speed: speed.count, skills: {readingMethod, right, expressiveness, mindfulness}},
       writing : {skills: writing},
     })
   }
@@ -105,7 +125,10 @@ class DiagnosticController {
     await Lexis.create({diagnosticId: diagnostic.id, ...tasks.lexis})
     await CoherentSpeech.create({diagnosticId: diagnostic.id, ...tasks.coherentSpeech})
     await LangAnalysis.create({diagnosticId: diagnostic.id, ...tasks.langAnalysis})
-    await Reading.create({diagnosticId: diagnostic.id})
+    await ReadingMethod.create({diagnosticId: diagnostic.id})
+    await Right.create({diagnosticId: diagnostic.id})
+    await Expressiveness.create({diagnosticId: diagnostic.id})
+    await Mindfulness.create({diagnosticId: diagnostic.id})
     await Speed.create({diagnosticId: diagnostic.id})
     await Writing.create({diagnosticId: diagnostic.id})
 

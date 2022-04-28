@@ -334,7 +334,7 @@ const LangAnalysis = sequelize.define('langAnalysis', {
   timestamps: false
 })
 
-const Reading = sequelize.define('reading', {
+const ReadingMethod = sequelize.define('readingMethod', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -359,46 +359,102 @@ const Reading = sequelize.define('reading', {
   wholeWords: {
     type: DataTypes.JSON,
     defaultValue: false
+  }
+}, {
+  timestamps: false
+})
+
+const Right = sequelize.define('right', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
-  phrases: {
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
+  },
+  passesSounds: {
     type: DataTypes.JSON,
     defaultValue: false
   },
-  passes: {
+  passesSyllables: {
     type: DataTypes.JSON,
     defaultValue: false
   },
-  permutations: {
+  permutationsSounds: {
     type: DataTypes.JSON,
     defaultValue: false
   },
-  substitutions: {
+  permutationsSyllables: {
     type: DataTypes.JSON,
     defaultValue: false
   },
-  additions: {
+  replaceGSSounds: {
     type: DataTypes.JSON,
     defaultValue: false
   },
-  replays: {
+  replaceFSSounds: {
     type: DataTypes.JSON,
     defaultValue: false
   },
-  sounds: {
+  substitutionsSyllables: {
     type: DataTypes.JSON,
     defaultValue: false
   },
-  syllables: {
+  substitutionsWords: {
     type: DataTypes.JSON,
     defaultValue: false
   },
-  words: {
+  additionsSounds: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  additionsSyllables: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  replaysSounds: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  replaysSyllables: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  replaysWords: {
     type: DataTypes.JSON,
     defaultValue: false
   },
   wrongEmphasis: {
     type: DataTypes.JSON,
     defaultValue: false
+  },
+  aggrammRading: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  persistentErrors: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  },
+  noErrorsRight: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  }
+}, {
+  timestamps: false
+})
+
+const Expressiveness = sequelize.define('expressiveness', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
   },
   pausesOnPunctuationMarks: {
     type: DataTypes.JSON,
@@ -411,6 +467,24 @@ const Reading = sequelize.define('reading', {
   emphasizingImportantWords: {
     type: DataTypes.JSON,
     defaultValue: false
+  },
+  intonedReading: {
+    type: DataTypes.JSON,
+    defaultValue: false
+  }
+}, {
+  timestamps: false
+})
+
+const Mindfulness = sequelize.define('mindfulness', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
   },
   literalSense: {
     type: DataTypes.JSON,
@@ -431,7 +505,12 @@ const Reading = sequelize.define('reading', {
   factualData: {
     type: DataTypes.JSON,
     defaultValue: false
+  },
+  understanding: {
+    type: DataTypes.JSON,
+    defaultValue: false
   }
+
 }, {
   timestamps: false
 })
@@ -574,8 +653,18 @@ CoherentSpeech.belongsTo(Diagnostic)
 Diagnostic.hasOne(LangAnalysis)
 LangAnalysis.belongsTo(Diagnostic)
 
-Diagnostic.hasOne(Reading)
-Reading.belongsTo(Diagnostic)
+Diagnostic.hasOne(ReadingMethod)
+ReadingMethod.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(Right)
+Right.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(Expressiveness)
+Expressiveness.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(Mindfulness)
+Mindfulness.belongsTo(Diagnostic)
+
 
 Diagnostic.hasOne(Speed)
 Speed.belongsTo(Diagnostic)
@@ -595,7 +684,10 @@ module.exports = {
   Lexis,
   CoherentSpeech,
   LangAnalysis,
-  Reading,
+  ReadingMethod,
+  Right,
+  Expressiveness,
+  Mindfulness,
   Speed,
   Writing
 }
