@@ -11,7 +11,11 @@ const {
   Right,
   Expressiveness,
   Mindfulness,
-  Writing,
+  PronunciationOfSounds,
+  UndisturbedPronunciation,
+  ViolationForms,
+  UnderdevelopmentGrammatical,
+  VisuospatialFunctions,
   Type} = require('../models/models')
 const ErrorApi = require('../error/ErrorApi')
 const fs = require('fs')
@@ -90,7 +94,28 @@ class DiagnosticController {
     const speed = await Speed.findOne({
       where: {diagnosticId: Number(id)}
     })
-    const writing = await Writing.findOne({
+
+    const pronunciationOfSounds = await PronunciationOfSounds.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+
+    const undisturbedPronunciation = await UndisturbedPronunciation.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+
+    const violationForms = await ViolationForms.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+
+    const underdevelopmentGrammatical = await UnderdevelopmentGrammatical.findOne({
+      where: {diagnosticId: Number(id)},
+      attributes: {exclude: ['id', 'diagnosticId']}
+    })
+
+    const visuospatialFunctions = await VisuospatialFunctions.findOne({
       where: {diagnosticId: Number(id)},
       attributes: {exclude: ['id', 'diagnosticId']}
     })
@@ -103,7 +128,7 @@ class DiagnosticController {
       coherentSpeech,
       langAnalysis,
       reading : {speed: speed.count, skills: {readingMethod, right, expressiveness, mindfulness}},
-      writing : {skills: writing},
+      writing : {skills: {pronunciationOfSounds, undisturbedPronunciation, violationForms, underdevelopmentGrammatical, visuospatialFunctions}},
     })
   }
 
@@ -130,7 +155,11 @@ class DiagnosticController {
     await Expressiveness.create({diagnosticId: diagnostic.id})
     await Mindfulness.create({diagnosticId: diagnostic.id})
     await Speed.create({diagnosticId: diagnostic.id})
-    await Writing.create({diagnosticId: diagnostic.id})
+    await PronunciationOfSounds.create({diagnosticId: diagnostic.id})
+    await UndisturbedPronunciation.create({diagnosticId: diagnostic.id})
+    await ViolationForms.create({diagnosticId: diagnostic.id})
+    await UnderdevelopmentGrammatical.create({diagnosticId: diagnostic.id})
+    await VisuospatialFunctions.create({diagnosticId: diagnostic.id})
 
     const type = await Type.findOne({where: {id: diagnostic.typeId}})
 

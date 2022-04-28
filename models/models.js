@@ -515,7 +515,7 @@ const Mindfulness = sequelize.define('mindfulness', {
   timestamps: false
 })
 
-const Writing = sequelize.define('writing', {
+const PronunciationOfSounds = sequelize.define('pronunciationOfSounds', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -537,6 +537,20 @@ const Writing = sequelize.define('writing', {
     type: DataTypes.JSON,
     defaultValue: false
   },
+}, {
+  timestamps: false
+})
+
+const UndisturbedPronunciation = sequelize.define('undisturbedPronunciation', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
+  },
   letterSubstitutions: {
     type: DataTypes.JSON,
     defaultValue: false
@@ -544,6 +558,20 @@ const Writing = sequelize.define('writing', {
   softnessDesignationErrors: {
     type: DataTypes.JSON,
     defaultValue: false
+  }
+}, {
+  timestamps: false
+})
+
+const ViolationForms = sequelize.define('violationForms', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
   },
   passes: {
     type: DataTypes.JSON,
@@ -572,6 +600,20 @@ const Writing = sequelize.define('writing', {
   missingMark: {
     type: DataTypes.JSON,
     defaultValue: false
+  }
+}, {
+  timestamps: false
+})
+
+const UnderdevelopmentGrammatical = sequelize.define('underdevelopmentGrammatical', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
   },
   morphologicalDisorders: {
     type: DataTypes.JSON,
@@ -584,6 +626,20 @@ const Writing = sequelize.define('writing', {
   textLevel: {
     type: DataTypes.JSON,
     defaultValue: false
+  }
+}, {
+  timestamps: false
+})
+
+const VisuospatialFunctions = sequelize.define('visuospatialFunctions', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  diagnosticId: {
+    type: DataTypes.INTEGER,
+    unique: true
   },
   mirrorSpelling: {
     type: DataTypes.JSON,
@@ -669,8 +725,20 @@ Mindfulness.belongsTo(Diagnostic)
 Diagnostic.hasOne(Speed)
 Speed.belongsTo(Diagnostic)
 
-Diagnostic.hasOne(Writing)
-Writing.belongsTo(Diagnostic)
+Diagnostic.hasOne(PronunciationOfSounds)
+PronunciationOfSounds.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(UndisturbedPronunciation)
+UndisturbedPronunciation.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(ViolationForms)
+ViolationForms.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(UnderdevelopmentGrammatical)
+UnderdevelopmentGrammatical.belongsTo(Diagnostic)
+
+Diagnostic.hasOne(VisuospatialFunctions)
+VisuospatialFunctions.belongsTo(Diagnostic)
 
 module.exports = {
   User,
@@ -689,7 +757,11 @@ module.exports = {
   Expressiveness,
   Mindfulness,
   Speed,
-  Writing
+  PronunciationOfSounds,
+  UndisturbedPronunciation,
+  ViolationForms,
+  UnderdevelopmentGrammatical,
+  VisuospatialFunctions
 }
 
 
