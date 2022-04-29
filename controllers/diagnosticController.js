@@ -202,16 +202,23 @@ class DiagnosticController {
   async save(req, res) {
     const {data} = req.body
     await Diagnostic.update({progress: data.progress}, {where: {id: data.id}})
-    const stateOfFunc = await StateOfFunc.update({...data.results.stateOfFunc}, {where: {diagnosticId: data.id}})
-    const sensMotor = await SensMotor.update({...data.results.sensMotor}, {where: {diagnosticId: data.id}})
-    const grammatic = await Grammatic.update({...data.results.grammatic}, {where: {diagnosticId: data.id}})
-    const lexis = await Lexis.update({...data.results.lexis}, {where: {diagnosticId: data.id}})
-    const coherentSpeech = await CoherentSpeech.update({...data.results.coherentSpeech}, {where: {diagnosticId: data.id}})
-    const langAnalysis = await LangAnalysis.update({...data.results.langAnalysis}, {where: {diagnosticId: data.id}})
-    // console.log(data.results.reading.skills)
-    const reading = await Reading.update({...data.results.reading.skills}, {where: {diagnosticId: data.id}})
-    const writing = await Writing.update({...data.results.writing.skills}, {where: {diagnosticId: data.id}})
-    const speed = await Speed.update({count: data.results.reading.speed}, {where: {diagnosticId: data.id}})
+    await StateOfFunc.update({...data.results.stateOfFunc}, {where: {diagnosticId: data.id}})
+    await SensMotor.update({...data.results.sensMotor}, {where: {diagnosticId: data.id}})
+    await Grammatic.update({...data.results.grammatic}, {where: {diagnosticId: data.id}})
+    await Lexis.update({...data.results.lexis}, {where: {diagnosticId: data.id}})
+    await CoherentSpeech.update({...data.results.coherentSpeech}, {where: {diagnosticId: data.id}})
+    await LangAnalysis.update({...data.results.langAnalysis}, {where: {diagnosticId: data.id}})
+    await ReadingMethod.update({...data.results.reading.skills.readingMethod}, {where: {diagnosticId: data.id}})
+    await Right.update({...data.results.reading.skills.right}, {where: {diagnosticId: data.id}})
+    await Expressiveness.update({...data.results.reading.skills.expressiveness}, {where: {diagnosticId: data.id}})
+    await Mindfulness.update({...data.results.reading.skills.mindfulness}, {where: {diagnosticId: data.id}})
+    await PronunciationOfSounds.update({...data.results.writing.skills.pronunciationOfSounds}, {where: {diagnosticId: data.id}})
+    await UndisturbedPronunciation.update({...data.results.writing.skills.undisturbedPronunciation}, {where: {diagnosticId: data.id}})
+    await ViolationForms.update({...data.results.writing.skills.violationForms}, {where: {diagnosticId: data.id}})
+    await UnderdevelopmentGrammatical.update({...data.results.writing.skills.underdevelopmentGrammatical}, {where: {diagnosticId: data.id}})
+    await VisuospatialFunctions.update({...data.results.writing.skills.visuospatialFunctions}, {where: {diagnosticId: data.id}})
+
+    await Speed.update({count: data.results.reading.speed}, {where: {diagnosticId: data.id}})
 
     return res.json({message: "Сохранено"})
   }
