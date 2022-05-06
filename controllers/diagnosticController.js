@@ -1,33 +1,30 @@
+const {Speed} = require('../models/models')
+
+const Diagnostic = require('../models/diagnostics/Diagnostic')
+const StateOfFunc = require('../models/diagnostics/sections/StateOfFunc')
+const SensMotor = require('../models/diagnostics/sections/SensMotor')
+const Grammatic = require('../models/diagnostics/sections/Grammatic')
+const Lexis = require('../models/diagnostics/sections/Lexis')
+const CoherentSpeech = require('../models/diagnostics/sections/CoherentSpeech')
+const LangAnalysis = require('../models/diagnostics/sections/LangAnalysis')
+const {Right, ReadingMethod, Expressiveness, Mindfulness} = require('../models/diagnostics/sections/Reading')
 const {
-  Diagnostic,
-  StateOfFunc,
-  SensMotor,
-  Grammatic,
-  CoherentSpeech,
-  Lexis,
-  LangAnalysis,
-  Speed,
-  ReadingMethod,
-  Right,
-  Expressiveness,
-  Mindfulness,
   PronunciationOfSounds,
   UndisturbedPronunciation,
   ViolationForms,
   UnderdevelopmentGrammatical,
-  VisuospatialFunctions,
-  Type} = require('../models/models')
+  VisuospatialFunctions
+} = require('../models/diagnostics/sections/Writing')
+
 const ErrorApi = require('../error/ErrorApi')
-const fs = require('fs')
 const sequilize = require('../db')
 const _ = require('lodash')
 
 class DiagnosticController {
   async getDiagnostics(req, res) {
     const {studentId} = req.query
-    const diagnostics = await sequilize.query(`SELECT "diagnostics"."id", "types"."title" as "Тип", progress as "Прогресс", "diagnostics"."classNumber" as "Класс","createdAt" as "Дата"
+    const diagnostics = await sequilize.query(`SELECT "diagnostics"."id", "diagnostics"."type" as "Тип", progress as "Прогресс", "diagnostics"."classNumber" as "Класс","createdAt" as "Дата"
                                               FROM diagnostics
-                                              LEFT JOIN types ON diagnostics."typeId" = "types"."id"
                                               WHERE diagnostics."studentId" = ${studentId};`)
     const fields = diagnostics[1].fields.map(f => f.name)
     const data = diagnostics[0]
@@ -161,11 +158,11 @@ class DiagnosticController {
     await UnderdevelopmentGrammatical.create({diagnosticId: diagnostic.id})
     await VisuospatialFunctions.create({diagnosticId: diagnostic.id})
 
-    const type = await Type.findOne({where: {id: diagnostic.typeId}})
+    // const type = await Type.findOne({where: {id: diagnostic.typeId}})
 
     res.json({
       id: diagnostic.id,
-      type: type.title,
+      type: diagnostic.type,
       "Прогресс": diagnostic.progress,
       "Класс": diagnostic.classNumber,
       date: diagnostic.createdAt
@@ -180,11 +177,11 @@ class DiagnosticController {
         where: {id: req.params.id}
       })
 
-      const type = await Type.findOne({where: {id: diagnostic.typeId}})
+      // const type = await Type.findOne({where: {id: diagnostic.typeId}})
 
       res.json({
         id: diagnostic.id,
-        type: type.title,
+        type: diagnostic.type,
         "Прогресс": diagnostic.progress,
         "Класс": diagnostic.classNumber,
         date: diagnostic.createdAt
@@ -194,10 +191,10 @@ class DiagnosticController {
     }
   }
 
-  async getTypes(req, res) {
-    const types = await Type.findAll()
-    res.json(types)
-  }
+  // async getTypes(req, res) {
+  //   const types = await Type.findAll()
+  //   res.json(types)
+  // }
 
   async save(req, res) {
     const {data} = req.body
