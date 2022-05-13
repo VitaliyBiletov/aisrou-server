@@ -41,91 +41,30 @@ class DiagnosticController {
     res.json(diagnostic)
   }
 
+  async getDiagnosticsList(req, res) {
+    const {studentId} = req.query
+    const diagnostics = await sequilize.query(`SELECT "diagnostics"."id" as "value", "createdAt" as "label"
+                                              FROM diagnostics
+                                              WHERE diagnostics."studentId" = ${studentId};`)
+    console.log(diagnostics)
+    res.json(diagnostics[0])
+  }
+
   async tasksLoading(req, res) {
     const {id} = req.params
+
     const stateOfFunc = await StateOfFunc.findOne({
       where: {diagnosticId: Number(id)},
       attributes: {exclude: ['id', 'diagnosticId']}
     })
-    const sensMotor = await SensMotor.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-    const grammatic = await Grammatic.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-    const lexis = await Lexis.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-    const coherentSpeech = await CoherentSpeech.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-    const langAnalysis = await LangAnalysis.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
 
-    const readingMethod = await ReadingMethod.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-
-    const right = await Right.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-
-    const expressiveness = await Expressiveness.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-
-    const mindfulness = await Mindfulness.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-
-    const speed = await Speed.findOne({
-      where: {diagnosticId: Number(id)}
-    })
-
-    const pronunciationOfSounds = await PronunciationOfSounds.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-
-    const undisturbedPronunciation = await UndisturbedPronunciation.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-
-    const violationForms = await ViolationForms.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-
-    const underdevelopmentGrammatical = await UnderdevelopmentGrammatical.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
-
-    const visuospatialFunctions = await VisuospatialFunctions.findOne({
-      where: {diagnosticId: Number(id)},
-      attributes: {exclude: ['id', 'diagnosticId']}
-    })
+    const sectionResults = getSectionsResult(id)
 
     res.json({
       stateOfFunc,
-      sensMotor,
-      grammatic,
-      lexis,
-      coherentSpeech,
-      langAnalysis,
-      reading : {speed: speed.count, skills: {readingMethod, right, expressiveness, mindfulness}},
-      writing : {skills: {pronunciationOfSounds, undisturbedPronunciation, violationForms, underdevelopmentGrammatical, visuospatialFunctions}},
+      ...sectionResults,
+      reading: getReadingResult(id),
+      writing: getWritingResult(id),
     })
   }
 
@@ -191,11 +130,6 @@ class DiagnosticController {
     }
   }
 
-  // async getTypes(req, res) {
-  //   const types = await Type.findAll()
-  //   res.json(types)
-  // }
-
   async save(req, res) {
     const {data} = req.body
     await Diagnostic.update({progress: data.progress}, {where: {id: data.id}})
@@ -226,27 +160,18 @@ class DiagnosticController {
     res.json(diagnostic)
   }
 
-  async getResult(req, res){
-    const {id} = req.params
-    const stateOfFunc = await StateOfFunc.findOne(
-      {
-        where: {diagnosticId: id},
-        attributes: ["Слух", "Зрение", "Голос", "Моторика", "Просодика", "Дыхание", "Артикулляционный аппарат", "Дополнительная информация"]})
-    const sensMotor = await SensMotor.findOne({
-      where: {diagnosticId: id},
-      attributes:[
-        "Артикуляционная моторика",
-        "Фонематическое восприятие",
-        "Звукопроизношение",
-        "Звуко-слоговая структура"
-      ]
-    })
+  async compare(req, res) {
+    const {id1, id2} = req.query
 
-    //Результаты подразделов сенсо-моторного уровня (по отдельности)
-    const result = Object.keys(sensMotor.dataValues).map(section=>{
-      const sum = calcResult(sensMotor.dataValues[section])
-      return {name: section, "Результат": sum}
-    })
+    const stateOfFuncResult1 = await getStateOfFuncResult(id1)
+    const sensMotorResult1 = await getSensMotorResult(id1)
+
+    const stateOfFuncResult2 = await getStateOfFuncResult(id2)
+    const sensMotorResult2 = await getSensMotorResult(id2)
+
+    const r1 = sensMotorResult1.map(item => ({name: item.name, uv: item["Результат"]}))
+    const r2 = sensMotorResult2.map(item => ({pv: item["Результат"]}))
+    const sensMotorResult = r1.map((item, index) => Object.assign({}, item, r2[index]))
 
     //Массив с результатами разделов
     const sectionsModels = [
@@ -254,39 +179,193 @@ class DiagnosticController {
       {name: "Лексика", model: Lexis},
       {name: "Связная речь", model: CoherentSpeech},
       {name: "Языковой анализ", model: LangAnalysis}
-      ]
+    ]
+
+    const resultSections1 = await calcSectionResult(id1, sectionsModels)
+    const rs1 = resultSections1.map(item => ({name: item.name, uv: item["Результат"]}))
+    const resultSections2 = await calcSectionResult(id2, sectionsModels)
+    const rs2 = resultSections2.map(item => ({pv: item["Результат"]}))
+    const otherSectionsResult = rs1.map((item, index) => Object.assign({}, item, rs2[index]))
+
+    res.json(
+    {
+      stateOfFunc: {
+        title: "Состояние функций",
+          data
+      :
+        [
+          stateOfFuncResult1,
+          stateOfFuncResult2
+        ]
+      },
+      sectionsResults: [...sensMotorResult,...otherSectionsResult]
+    }
+  )
+  }
+
+  async getResult(req, res) {
+    const {id} = req.params
+    const stateOfFuncResult = await getStateOfFuncResult(id)
+    const sensMotorResult = await getSensMotorResult(id)
+
+    //Массив с результатами разделов
+    const sectionsModels = [
+      {name: "Грамматика", model: Grammatic},
+      {name: "Лексика", model: Lexis},
+      {name: "Связная речь", model: CoherentSpeech},
+      {name: "Языковой анализ", model: LangAnalysis}
+    ]
 
     const resultSections = await calcSectionResult(id, sectionsModels)
 
     res.json({
-      stateOfFunc: {title: "Состояние функций", data: stateOfFunc},
-      sensMotor: _.union(result, resultSections),
+      stateOfFunc: {title: "Состояние функций", data: stateOfFuncResult},
+      sensMotor: _.union(sensMotorResult, resultSections),
     })
   }
 }
 
-function calcResult(data){
-  if (data.length === 0){
+function calcResult(data) {
+  if (data.length === 0) {
     return 0
   }
-  const tmp = data.reduce((sum, current)=>{
+  const tmp = data.reduce((sum, current) => {
     return sum + current.value
   }, 0)
   const result = Number((tmp / (data.length * 3)) * 100).toFixed(2)
   return parseFloat(result)
 }
 
-async function calcSectionResult(id, modelsList){
-  const sections = await Promise.all(modelsList.map(async function({name, model}){
-      const section = await model.findOne({where:{diagnosticId: id}, attributes:{exclude: ['id', 'diagnosticId']}})
-      const result = Object.keys(section.dataValues).map(item=>{
-        return calcResult(section.dataValues[item])
-      }).reduce((sum, current)=>{
-        return sum + current
-      }, 0)
-    return {name , "Результат": parseFloat((result / Object.keys(section.dataValues).length).toFixed(2))}
+async function calcSectionResult(id, modelsList) {
+  const sections = await Promise.all(modelsList.map(async function ({name, model}) {
+    const section = await model.findOne({where: {diagnosticId: id}, attributes: {exclude: ['id', 'diagnosticId']}})
+    const result = Object.keys(section.dataValues).map(item => {
+      return calcResult(section.dataValues[item])
+    }).reduce((sum, current) => {
+      return sum + current
+    }, 0)
+    return {name, "Результат": parseFloat((result / Object.keys(section.dataValues).length).toFixed(2))}
   }))
   return sections
 }
+
+async function getStateOfFuncResult(id) {
+  return await StateOfFunc.findOne({
+    where: {diagnosticId: id},
+    attributes: ["Слух", "Зрение", "Голос", "Моторика", "Просодика", "Дыхание", "Артикулляционный аппарат", "Дополнительная информация"]
+  })
+}
+
+async function getSensMotorResult(id) {
+  const sensMotor = await SensMotor.findOne({
+    where: {diagnosticId: id},
+    attributes: [
+      "Артикуляционная моторика",
+      "Фонематическое восприятие",
+      "Звукопроизношение",
+      "Звуко-слоговая структура"
+    ]
+  })
+
+  return Object.keys(sensMotor.dataValues).map(section => {
+    const sum = calcResult(sensMotor.dataValues[section])
+    return {name: section, "Результат": sum}
+  })
+}
+
+async function getSectionsResult(id) {
+  const sensMotor = await SensMotor.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const grammatic = await Grammatic.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const lexis = await Lexis.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const coherentSpeech = await CoherentSpeech.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const langAnalysis = await LangAnalysis.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  return {sensMotor, grammatic, lexis, coherentSpeech, langAnalysis}
+}
+
+async function getReadingResult(id){
+  const readingMethod = await ReadingMethod.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const right = await Right.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const expressiveness = await Expressiveness.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const mindfulness = await Mindfulness.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const speed = await Speed.findOne({
+    where: {diagnosticId: Number(id)}
+  })
+
+  return {speed: speed.count, skills: {readingMethod, right, expressiveness, mindfulness}}
+}
+
+async function getWritingResult(id){
+  const pronunciationOfSounds = await PronunciationOfSounds.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const undisturbedPronunciation = await UndisturbedPronunciation.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const violationForms = await ViolationForms.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const underdevelopmentGrammatical = await UnderdevelopmentGrammatical.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  const visuospatialFunctions = await VisuospatialFunctions.findOne({
+    where: {diagnosticId: Number(id)},
+    attributes: {exclude: ['id', 'diagnosticId']}
+  })
+
+  return {
+    skills: {
+      pronunciationOfSounds,
+      undisturbedPronunciation,
+      violationForms,
+      underdevelopmentGrammatical,
+      visuospatialFunctions
+    }
+  }
+}
+
 
 module.exports = new DiagnosticController()
