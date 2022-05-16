@@ -76,12 +76,13 @@ class DiagnosticController {
 
   async create(req, res) {
     const {studentId, userId, typeId, classNumber, date, tasks} = req.body
+    console.log(typeId)
     const diagnostic = await Diagnostic.create({
         studentId,
         userId,
         progress: 0,
         classNumber,
-        typeId: typeId,
+        type: typeId,
         createdAt: Date.parse(date)
       }
     )
