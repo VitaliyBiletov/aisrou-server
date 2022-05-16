@@ -46,7 +46,6 @@ class DiagnosticController {
     const diagnostics = await sequilize.query(`SELECT "diagnostics"."id" as "value", "createdAt" as "label"
                                               FROM diagnostics
                                               WHERE diagnostics."studentId" = ${studentId};`)
-    console.log(diagnostics)
     res.json(diagnostics[0])
   }
 
@@ -58,13 +57,20 @@ class DiagnosticController {
       attributes: {exclude: ['id', 'diagnosticId']}
     })
 
-    const sectionResults = getSectionsResult(id)
+    const sectionResults = await getSectionsResult(id)
+
+    console.log({
+      stateOfFunc,
+      ...sectionResults,
+      reading: await getReadingResult(id),
+      writing: await getWritingResult(id),
+    })
 
     res.json({
       stateOfFunc,
       ...sectionResults,
-      reading: getReadingResult(id),
-      writing: getWritingResult(id),
+      reading: await getReadingResult(id),
+      writing: await getWritingResult(id),
     })
   }
 
@@ -80,12 +86,25 @@ class DiagnosticController {
       }
     )
 
+    const listOfTasks = [
+      {name: 'sensMotor', model: SensMotor},
+      {name: 'grammatic', model: Grammatic},
+      {name: 'lexis', model: Lexis},
+      {name: 'coherentSpeech', model: CoherentSpeech},
+      {name: 'langAnalysis', model: LangAnalysis},
+    ]
+
     await StateOfFunc.create({diagnosticId: diagnostic.id})
-    await SensMotor.create({diagnosticId: diagnostic.id, ...tasks.sensMotor})
-    await Grammatic.create({diagnosticId: diagnostic.id, ...tasks.grammatic})
-    await Lexis.create({diagnosticId: diagnostic.id, ...tasks.lexis})
-    await CoherentSpeech.create({diagnosticId: diagnostic.id, ...tasks.coherentSpeech})
-    await LangAnalysis.create({diagnosticId: diagnostic.id, ...tasks.langAnalysis})
+
+    listOfTasks.forEach(async ({name, model})=>{
+      await model.create({diagnosticId: diagnostic.id, ...tasks[name]})
+    })
+
+    // await SensMotor.create({diagnosticId: diagnostic.id, ...tasks.sensMotor})
+    // await Grammatic.create({diagnosticId: diagnostic.id, ...tasks.grammatic})
+    // await Lexis.create({diagnosticId: diagnostic.id, ...tasks.lexis})
+    // await CoherentSpeech.create({diagnosticId: diagnostic.id, ...tasks.coherentSpeech})
+    // await LangAnalysis.create({diagnosticId: diagnostic.id, ...tasks.langAnalysis})
     await ReadingMethod.create({diagnosticId: diagnostic.id})
     await Right.create({diagnosticId: diagnostic.id})
     await Expressiveness.create({diagnosticId: diagnostic.id})
@@ -132,6 +151,7 @@ class DiagnosticController {
 
   async save(req, res) {
     const {data} = req.body
+    console.log(data)
     await Diagnostic.update({progress: data.progress}, {where: {id: data.id}})
     await StateOfFunc.update({...data.results.stateOfFunc}, {where: {diagnosticId: data.id}})
     await SensMotor.update({...data.results.sensMotor}, {where: {diagnosticId: data.id}})
@@ -187,6 +207,11 @@ class DiagnosticController {
     const rs2 = resultSections2.map(item => ({pv: item["Результат"]}))
     const otherSectionsResult = rs1.map((item, index) => Object.assign({}, item, rs2[index]))
 
+    const readingResult1 = await getReadingResult(id1)
+    const writingResult1 = await getWritingResult(id1)
+
+    const readingResult2 = await getReadingResult(id2)
+    const writingResult2 = await getWritingResult(id2)
     res.json(
     {
       stateOfFunc: {
@@ -198,7 +223,9 @@ class DiagnosticController {
           stateOfFuncResult2
         ]
       },
-      sectionsResults: [...sensMotorResult,...otherSectionsResult]
+      sectionsResults: [...sensMotorResult,...otherSectionsResult],
+      readingResults: [readingResult1, readingResult2],
+      writingResult: [writingResult1, writingResult2]
     }
   )
   }
