@@ -226,7 +226,7 @@ class DiagnosticController {
       },
       sectionsResults: [...sensMotorResult,...otherSectionsResult],
       readingResults: [readingResult1, readingResult2],
-      writingResult: [writingResult1, writingResult2]
+      writingResults: [writingResult1, writingResult2]
     }
   )
   }
@@ -251,7 +251,39 @@ class DiagnosticController {
       sensMotor: _.union(sensMotorResult, resultSections),
     })
   }
+
+  async getResults(req, res){
+    const sectionsModels = [
+        {name: "Грамматика", model: Grammatic},
+        {name: "Лексика", model: Lexis},
+        {name: "Связная речь", model: CoherentSpeech},
+        {name: "Языковой анализ", model: LangAnalysis}
+    ]
+    const diagnostics = await sequilize.query(`select "sensMotors".* from diagnostics left join "sensMotors"
+                                                on "sensMotors"."diagnosticId" = diagnostics.id
+                                                where "classNumber"=${req.body.classNumber} and "createdAt" between '${req.body.date-1}-06-01' and '${req.body.date}-06-01';`)
+      const result = await Promise.all(diagnostics[0].map(async (item)=>{
+        const sensMotor = await getSensMotorResult(item.diagnosticId)
+        const otherSection = await calcSectionResult(item.diagnosticId, sectionsModels)
+        return _.union(sensMotor, otherSection)
+    }))
+
+    let results = result.map(item=>{
+        return item.reduce((cur, next)=> {return {...cur, [next.name] : next['Результат']}}, {})
+    })
+
+    const t = results.reduce((cur, next)=>{
+         for(let key in next) {
+             cur[key] = (cur[key] || 0) + next[key] / results.length
+         }
+          return cur
+      }, {})
+
+    res.json({count: result.length, tasks: t})
+  }
 }
+
+
 
 function calcResult(data) {
   if (data.length === 0) {
