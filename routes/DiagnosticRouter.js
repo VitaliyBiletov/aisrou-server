@@ -15,6 +15,6 @@ router.post('/save/', diagnosticController.save)
 router.get('/compare', diagnosticController.compare)
 router.get('/:id', diagnosticController.get)
 router.get('/result/:id', diagnosticController.getResult)
-router.post('/results/', diagnosticController.getResults)
+router.post('/results/', diagnosticController.getResultsForClass)
 
 module.exports = router
