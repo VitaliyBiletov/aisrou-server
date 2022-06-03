@@ -275,19 +275,28 @@ class DiagnosticController {
     }
 
     //Результаты по классу (среднее значение)
-    async getResultsForClass(req, res) {
+    async getResultsForClass(req, res, next) {
         const {year, classNumber} = req.body
 
-        const listStudents = await sequilize.query(`SELECT CONCAT(s."lastName",' ', s."firstName") as name, COUNT(*) as count FROM "diagnostics" d
-                LEFT JOIN "students" s
-                ON d."studentId" = s.id
-                WHERE "classNumber" = ${Number(classNumber)} and d."createdAt" between '${Number(year) - 1}-06-01' and '${Number(year)}-06-01'
-                GROUP BY s.id`)
+        const listTeachers = await sequilize.query(
+            `SELECT CONCAT(s."lastName",' ', s."firstName", ' ', s.patronymic) as name FROM "diagnostics" d
+            LEFT JOIN "users" s
+            ON d."userId" = s.id
+            WHERE "classNumber" = ${Number(classNumber)} and d."createdAt" between '${Number(year) - 1}-06-01' and '${Number(year)}-06-01'
+            GROUP BY s.id`)
+
+        const listStudents = await sequilize.query(
+            `SELECT CONCAT(s."lastName",' ', s."firstName") as name, COUNT(*) as count FROM "diagnostics" d
+            LEFT JOIN "students" s
+            ON d."studentId" = s.id
+            WHERE "classNumber" = ${Number(classNumber)} and d."createdAt" between '${Number(year) - 1}-06-01' and '${Number(year)}-06-01'
+            GROUP BY s.id`)
 
         const resultStart = await calcAVGResult(year, classNumber, 0)
         const resultEnd = await calcAVGResult(year, classNumber, 1)
 
         res.json({
+            listTeachers: listTeachers[0],
             listStudents: listStudents[0],
             countStart: resultStart.count,
             countEnd: resultEnd.count,
@@ -307,7 +316,6 @@ async function calcAVGResult(year, classNumber, type) {
     const diagnosticsStart = await sequilize.query(`select "sensMotors".* from diagnostics left join "sensMotors"
                                                 on "sensMotors"."diagnosticId" = diagnostics.id
                                                 where "type"=${type} and "classNumber"=${Number(classNumber)} and "createdAt" between '${Number(year) - 1}-06-01' and '${year}-06-01';`)
-
 
     const result = await Promise.all(diagnosticsStart[0].map(async (item) => {
         const sensMotor = await getSensMotorResult(item.diagnosticId)
