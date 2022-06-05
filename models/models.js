@@ -3,69 +3,69 @@ const Diagnostic = require('./diagnostics/Diagnostic')
 const {DataTypes} = require('sequelize')
 
 const User = sequelize.define('user', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  firstName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  lastName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  patronymic: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  email: {
-    type: DataTypes.STRING,
-    unique: true,
-  },
-  password: {
-    type: DataTypes.STRING,
-  },
-  role: {
-    type: DataTypes.STRING,
-    defaultValue: "USER",
-  },
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    firstName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    lastName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    patronymic: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    email: {
+        type: DataTypes.STRING,
+        unique: true,
+    },
+    password: {
+        type: DataTypes.STRING,
+    },
+    role: {
+        type: DataTypes.STRING,
+        defaultValue: "USER",
+    },
 })
 
 const Student = sequelize.define('student', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  firstName: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  lastName: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  dateOfBirth: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-  },
-  enrollmentDate: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-  },
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    firstName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    lastName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    dateOfBirth: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+    },
+    enrollmentDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+    },
 })
 
 const Group = sequelize.define('group', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  createdAt: {
-    type: DataTypes.DATEONLY,
-  },
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    createdAt: {
+        type: DataTypes.DATEONLY,
+    },
 })
 
 // const Type = sequelize.define('type', {
@@ -82,21 +82,21 @@ const Group = sequelize.define('group', {
 // })
 
 const Speed = sequelize.define('speed', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  diagnosticId: {
-    type: DataTypes.INTEGER,
-    unique: true
-  },
-  count: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
-  }
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    diagnosticId: {
+        type: DataTypes.INTEGER,
+        unique: true
+    },
+    count: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    }
 }, {
-  timestamps: false
+    timestamps: false
 })
 
 
@@ -115,11 +115,11 @@ Diagnostic.hasOne(Speed)
 Speed.belongsTo(Diagnostic)
 
 module.exports = {
-  User,
-  Student,
-  Group,
-  // Type,
-  Speed
+    User,
+    Student,
+    Group,
+    // Type,
+    Speed
 }
 
 
