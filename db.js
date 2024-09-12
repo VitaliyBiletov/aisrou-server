@@ -7,7 +7,11 @@ module.exports = new Sequelize(
     process.env.DB_PASSWORD,
     {
         dialect: 'postgres',
-        host: process.env.DB_HOST,
-        logging: false
+        host: 'db',
+        pool: {
+            max: 9,
+            min: 0,
+            idle: 10000
+        }
     }
 )
