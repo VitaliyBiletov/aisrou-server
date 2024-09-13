@@ -99,6 +99,24 @@ const Speed = sequelize.define('speed', {
     timestamps: false
 })
 
+const Wishes = sequelize.define('wishes', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    wishText: {
+        type: DataTypes.TEXT,
+        unique: false
+    },
+    state: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
+}, {
+    timestamps: false
+})
+
 
 User.belongsToMany(Student, {through: Group, foreignKey: 'userId', otherKey: 'studentId'})
 Student.belongsToMany(User, {through: Group, foreignKey: 'studentId', otherKey: 'userId'})
@@ -119,7 +137,8 @@ module.exports = {
     Student,
     Group,
     // Type,
-    Speed
+    Speed,
+    Wishes
 }
 
 
